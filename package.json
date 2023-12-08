@@ -1,0 +1,85 @@
+{
+  "name": "serene-src",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./compile-main/electron.js",
+  "dependencies": {
+    "@pixi/react": "^7.1.1",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.68",
+    "@types/react": "^18.2.42",
+    "@types/react-dom": "^18.2.17",
+    "electron-is-dev": "^2.0.0",
+    "pixi.js": "^7.3.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "electron": "wait-on http://localhost:3000 && electron .",
+    "compile-main": "tsc ./src/electron.ts --outdir ./compile-main",
+    "dev": "concurrently \"yarn start\" \"yarn electron\"",
+    "deploy": "electron-builder --windows nsis:ia32"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "homepage": "./",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "wait-on": "^7.2.0",
+    "yarn": "^1.22.21"
+  },
+  "build":{
+    "productName": "Serene",
+    "appId": "com.serene.app",
+    "asar": true,
+    "protocols": {
+      "name": "serene",
+      "schemes": [
+        "serene"
+      ]
+    },
+    "win": {
+      "target": ["nsis", "zip"],
+      "icon": "./public/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
+    },
+    "directories": {
+      "buildResources": "build",
+      "output": "./dist/",
+      "app": "."
+    }
+  }
+}
