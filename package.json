@@ -26,7 +26,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "wait-on http://localhost:3000 && electron .",
-    "compile-main": "tsc ./src/electron.ts --outdir ./compile-main",
+    "compile": "tsc ./src/electron.ts ./src/preload.ts --outdir ./compile-main",
     "dev": "concurrently \"yarn start\" \"yarn electron\"",
     "deploy": "electron-builder --windows nsis:ia32"
   },

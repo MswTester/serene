@@ -10,9 +10,11 @@ var mainWindow = null;
 var createWindow = function () {
     // browser window를 생성합니다.
     mainWindow = new electron_1.BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 800,
         resizable: true,
+        autoHideMenuBar: true,
+        icon: path.join(__dirname, '../public/favicon.ico'),
         webPreferences: {
             devTools: isDev,
             nodeIntegration: true,
