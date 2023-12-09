@@ -1,5 +1,6 @@
-import {BrowserWindow, app} from 'electron'
+import {BrowserWindow, app, ipcMain} from 'electron'
 import * as path from 'path'
+import * as fs from 'fs'
 import * as isDev from 'electron-is-dev'
 
 const BASE_URL = 'http://localhost:3000'
@@ -11,6 +12,8 @@ let mainWindow: BrowserWindow | null = null
 const createWindow = () => {
   // browser window를 생성합니다.
   mainWindow = new BrowserWindow({
+    minWidth:600,
+    minHeight: 400,
     width: 1200,
     height: 800,
     resizable: true,
@@ -30,6 +33,12 @@ const createWindow = () => {
   } else { // 프로덕션 모드인 경우
     mainWindow.loadFile(path.join(__dirname, './build/index.html')) // 
   }
+
+  ipcMain.on('get-maps', async (event) => {
+    fs.existsSync(path.join(__dirname, '../maps')) || fs.mkdirSync(path.join(__dirname, '../maps'))
+    const maps = fs.readdirSync(path.join(__dirname, '../maps'))
+    event.reply('get-maps-reply', maps)
+  })
 }
 
 // Electron이 준비되면 whenReady 메서드가 호출되어,

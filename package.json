@@ -1,6 +1,6 @@
 {
-  "name": "serene-src",
-  "version": "0.1.0",
+  "name": "serene",
+  "version": "1.0.0",
   "private": true,
   "main": "./compile-main/electron.js",
   "dependencies": {
@@ -13,6 +13,9 @@
     "@types/react": "^18.2.42",
     "@types/react-dom": "^18.2.17",
     "electron-is-dev": "^2.0.0",
+    "firebase": "^10.7.1",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
     "pixi.js": "^7.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -27,7 +30,7 @@
     "eject": "react-scripts eject",
     "electron": "wait-on http://localhost:3000 && electron .",
     "compile": "tsc ./src/electron.ts ./src/preload.ts --outdir ./compile-main",
-    "dev": "concurrently \"yarn start\" \"yarn electron\"",
+    "dev": "concurrently \"npm run start\" \"npm run electron\"",
     "deploy": "electron-builder --windows nsis:ia32"
   },
   "eslintConfig": {
@@ -50,14 +53,16 @@
   },
   "homepage": "./",
   "devDependencies": {
+    "autoprefixer": "^10.4.16",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1",
-    "wait-on": "^7.2.0",
-    "yarn": "^1.22.21"
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "wait-on": "^7.2.0"
   },
-  "build":{
+  "build": {
     "productName": "Serene",
     "appId": "com.serene.app",
     "asar": true,
@@ -68,7 +73,10 @@
       ]
     },
     "win": {
-      "target": ["nsis", "zip"],
+      "target": [
+        "nsis",
+        "zip"
+      ],
       "icon": "./public/favicon.ico"
     },
     "nsis": {
