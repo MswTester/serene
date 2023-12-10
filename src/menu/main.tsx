@@ -6,7 +6,7 @@ import Single from "./single";
 export const MenuContext = createContext<any>({});
 
 export default function Menu() {
-    const {user, setPage} = useContext(globalContext);
+    const {setPage} = useContext(globalContext);
     const [menuPage, setMenuPage] = useState<"main"|"single"|"server"|"settings"|"about">("main");
     
     return (<MenuContext.Provider value={{
