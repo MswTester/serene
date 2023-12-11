@@ -24,7 +24,6 @@ export default function Index() {
             setLoading(false);
             setUser(curUser.user);
             if(!curUser.user.emailVerified) return setLogPage("emailVerify");
-            console.log(curUser.user);
             setPage("menu")
         } catch (err:any){
             setLoading(false);
