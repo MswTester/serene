@@ -9,7 +9,7 @@ export const MenuContext = createContext<any>({});
 
 export default function Menu() {
     const {setPage} = useContext(globalContext);
-    const [menuPage, setMenuPage] = useState<"main"|"server"|"settings"|"about">("server");
+    const [menuPage, setMenuPage] = useState<"main"|"server"|"settings"|"about">("main");
     
     return (<MenuContext.Provider value={{
         menuPage, setMenuPage,

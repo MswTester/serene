@@ -10,7 +10,7 @@ export const globalContext = createContext<CT|any>({});
 function App() {
   const [hydrated, setHydrated] = useState(false);
   const [user, setUser] = useState<User|null>(null);
-  const [page, setPage] = useState<Page>("menu");
+  const [page, setPage] = useState<Page>("login");
 
   useEffect(() => {
     setHydrated(true);
