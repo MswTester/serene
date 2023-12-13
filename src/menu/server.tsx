@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import { globalContext } from "../App";
 import { MenuContext } from "./main";
 
@@ -59,20 +60,22 @@ export default function Index(){
         });
         setServers(fetched_servers);
         fetched_servers = await Promise.all(fetched_servers.map(async (server) => {
-            const res = await fetch(`https://api.mcsrvstat.us/2/${server.address}:${server.port}`);
-            const data = await res.json();
-            if(data.online){
+            try {
+                const res = await fetch(`http://${server.address}:${server.port}`);
+                const data = await res.json();
+                console.log(data)
                 return {
                     name: data.name,
                     description: data.description,
-                    date: new Date().toLocaleDateString(),
+                    date: data.date,
                     address: server.address,
                     port: server.port,
                     maxPlayers: data.maxplayers,
                     players: data.onlineplayers,
                     online: true
                 }
-            } else {
+            } catch (error) {
+                console.log(error)
                 return {
                     name: `${server.address}:${server.port}`,
                     description: "Offline",
