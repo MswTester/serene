@@ -4,7 +4,7 @@ import { globalContext } from "../App";
 import { MenuContext } from "./main";
 
 export default function Index(){
-    const {setPage} = useContext(globalContext);
+    const {setPage, setSocket} = useContext(globalContext);
     const {setMenuPage} = useContext(MenuContext);
     const [servers, setServers] = useState<fetchedServer[]>([]);
     const [msgbox, setMsgbox] = useState<string>("");
@@ -79,7 +79,7 @@ export default function Index(){
                 return {
                     name: `${server.address}:${server.port}`,
                     description: "Offline",
-                    date: new Date().toLocaleDateString(),
+                    date: "Offline",
                     address: server.address,
                     port: server.port,
                     maxPlayers: 0,
@@ -163,7 +163,11 @@ export default function Index(){
                             <div className="flex justify-end">
                                 {server.online && <button className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 px-4 py-2 bg-[#aaffaa] text-black mr-2"
                                 onClick={e => {
-                                    setPage('game')
+                                    let socket = io(`http://${server.address}:${server.port}`)
+                                    socket.on('connect', () => {
+                                        setSocket(socket)
+                                        setPage('game')
+                                    })
                                 }}>
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"

@@ -6,4 +6,5 @@ export interface ServerConfig{
     date: string;
     maxPlayers: number;
     socket: Server;
+    file?: string;
 }

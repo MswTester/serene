@@ -44,5 +44,6 @@ app.get('/', (req, res) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`listening on *:${PORT}`);
+    server.on()
+    console.log(`listening on *:${PORT}`);
 });
