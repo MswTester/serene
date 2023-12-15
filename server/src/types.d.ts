@@ -8,3 +8,11 @@ export interface ServerConfig{
     socket: Server;
     file?: string;
 }
+
+
+export interface Transform{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}

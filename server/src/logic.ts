@@ -1,17 +1,25 @@
 import { Server } from "socket.io";
 import { ServerConfig } from "./types";
 import { readFileSync, write, writeFileSync } from "fs";
+import { Entity } from "./entities";
+import { Resource } from "./resources";
+import { Structure } from "./structures";
+import { Player } from "./player";
+import { Terrain } from "./terrain";
 
 export default class ServerLogic {
-    name: string = 'Server Server';
+    name: string = 'Serene Server';
     description: string = 'Hello World!';
     date: string = new Date().toLocaleDateString();
     socket:Server;
     maxPlayers: number = 100;
-    players: any[] = [];
-    entities: any[] = [];
-    resources: any[] = [];
-    structures: any[] = [];
+    players: Player[] = [];
+    entities: Entity[] = [];
+    resources: Resource[] = [];
+    structures: Structure[] = [];
+    terrain: Terrain[] = [];
+    bannedID: string[] = [];
+    bannedIP: string[] = [];
     time: number = 0;
     weather: number = 0;
     constructor(config:ServerConfig) {
@@ -26,17 +34,12 @@ export default class ServerLogic {
             this.entities = world.entities;
             this.resources = world.resources;
             this.structures = world.structures;
+            this.terrain = world.terrain;
+            this.bannedID = world.bannedID;
+            this.bannedIP = world.bannedIP;
             this.time = world.time;
             this.weather = world.weather;
         }
-    }
-
-    addPlayer(player:any) {
-        this.players.push(player);
-    }
-
-    removePlayer(player:any) {
-        this.players = this.players.filter(p => p !== player);
     }
 
     getServerInfo() {
@@ -46,15 +49,44 @@ export default class ServerLogic {
             description: this.description,
             date: this.date,
             maxplayers: this.maxPlayers,
-            onlineplayers: this.players.filter(v => v.online).length,
+            onlineplayers: this.players.length,
         };
     }
 
     on(){
         this.socket.on('connection', (socket) => {
-            console.log('a user connected');
+            console.log('a user connected', socket.handshake.address);
+            if(this.bannedIP.includes(socket.handshake.address)) {
+                socket.emit('kick', 'You are banned from this server!');
+                socket.disconnect();
+                return;
+            }
+            this.players.push(new Player('', '', '', socket.id, socket.handshake.address));
+
+            socket.on('init', (data) => {
+                if(this.bannedID.includes(data.uuid)) {
+                    socket.emit('kick', 'You are banned from this server!');
+                    socket.disconnect();
+                    return;
+                }
+                this.players[this.players.findIndex((player) => player.socketId === socket.id)].name = data.name;
+                this.players[this.players.findIndex((player) => player.socketId === socket.id)].email = data.email;
+                this.players[this.players.findIndex((player) => player.socketId === socket.id)].uuid = data.uuid;
+                socket.emit('init', {
+                    world: {
+                        time: this.time,
+                        weather: this.weather,
+                    },
+                    player: this.players[this.players.findIndex((player) => player.socketId === socket.id)],
+                    entities: this.entities,
+                    resources: this.resources,
+                    structures: this.structures,
+                });
+            })
+
             socket.on('disconnect', () => {
                 console.log('user disconnected');
+                this.players.splice(this.players.findIndex((player) => player.socketId === socket.id), 1);
             });
             socket.on('chat message', (msg) => {
                 console.log('message: ' + msg);
@@ -66,8 +98,15 @@ export default class ServerLogic {
                 time: this.time,
                 weather: this.weather,
             });
+            this.entities.forEach((entity) => {
+                entity.tick();
+            });
+            this.resources.forEach((resource) => {
+                resource.tick();
+            });
             setTimeout(loop, 1000 / 60);
         };
+        loop();
     }
 
     saveWorld() {
@@ -77,10 +116,21 @@ export default class ServerLogic {
             entities: this.entities,
             resources: this.resources,
             structures: this.structures,
+            terrain: this.terrain,
+            bannedID: this.bannedID,
+            bannedIP: this.bannedIP,
             time: this.time,
             weather: this.weather,
         };
         writeFileSync('./world.json', JSON.stringify(world));
         console.log('world saved!');
+    }
+
+    banPlayer(uuid:string) {
+        this.bannedID.push(uuid);
+    }
+
+    banIP(ip:string) {
+        this.bannedIP.push(ip);
     }
 }
