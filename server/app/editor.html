@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        nav{
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 80%;
+            height: 50px;
+            background-image: linear-gradient(to bottom, #ffffffaa, #ffffffdd 50%, #ffffff99);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            transform: translate(-50%, 0);
+            border-radius: 0 0 10px 10px;
+        }
+        button{
+            width: 100px;
+            height: 30px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            background-color: #fff;
+            color: #000;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover{background-color: #eee;}
+        button:active{background-color: #ddd;}
+        input{
+            width: 100px;
+            height: 30px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            padding: 0 10px;
+            font-size: 16px;
+        }
+        input:focus{background-color: #eee;}
+
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+    <nav>
+        <button id="new">New</button>
+        <button id="open">Open</button>
+        <button id="save">Save</button>
+        <input type="number" name="" id="width" placeholder="width">
+        <input type="number" name="" id="height" placeholder="height">
+    </nav>
+    <script>
+        const canvas = document.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        const nav = document.querySelector('nav');
+        const new_btn = nav.querySelector('button#new');
+        const open_btn = nav.querySelector('button#open');
+        const save_btn = nav.querySelector('button#save');
+
+        const resize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        let position = {x: 0, y: 0};
+        let zoom = 1;
+        let world = {
+            entities: [],
+            resources: [],
+            structures: [],
+            terrain: [],
+            bannedID: [],
+            bannedIP: [],
+            time: 0,
+            weather: 0
+        }
+
+        const createWorld = (width, height) => {
+            let world = new Array(height).fill(0).map(() => new Array(width).fill(0));
+        }
+    </script>
+</body>
+</html>

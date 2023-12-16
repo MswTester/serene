@@ -5,19 +5,28 @@ import { Entity } from "./entities";
 import { Resource } from "./resources";
 import { Structure } from "./structures";
 import { Player } from "./player";
-import { Terrain } from "./terrain";
+
+enum Terrain{
+    Grass = 0,
+    Dirt = 1,
+    Water = 2,
+    Stone = 3,
+    Sand = 4,
+    Snow = 5,
+    Lava = 6,
+}
 
 export default class ServerLogic {
     name: string = 'Serene Server';
     description: string = 'Hello World!';
     date: string = new Date().toLocaleDateString();
     socket:Server;
+    terrain: Terrain[][] = [];
     maxPlayers: number = 100;
     players: Player[] = [];
     entities: Entity[] = [];
     resources: Resource[] = [];
     structures: Structure[] = [];
-    terrain: Terrain[] = [];
     bannedID: string[] = [];
     bannedIP: string[] = [];
     time: number = 0;
@@ -30,7 +39,6 @@ export default class ServerLogic {
         this.socket = config.socket;
         if(config.file) {
             let world = JSON.parse(readFileSync(config.file).toString());
-            this.players = world.players;
             this.entities = world.entities;
             this.resources = world.resources;
             this.structures = world.structures;
@@ -101,9 +109,6 @@ export default class ServerLogic {
             this.entities.forEach((entity) => {
                 entity.tick();
             });
-            this.resources.forEach((resource) => {
-                resource.tick();
-            });
             setTimeout(loop, 1000 / 60);
         };
         loop();
@@ -112,7 +117,6 @@ export default class ServerLogic {
     saveWorld() {
         console.log('saving world...');
         let world = {
-            players: this.players,
             entities: this.entities,
             resources: this.resources,
             structures: this.structures,

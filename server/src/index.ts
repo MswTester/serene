@@ -43,6 +43,10 @@ app.get('/', (req, res) => {
     });
 });
 
+app.get('/editor', (req, res) => {
+    res.sendFile(__dirname.replace('\\dist', '').replace('\\src', '') + '/app/editor.html');
+});
+
 httpServer.listen(PORT, () => {
     server.on()
     console.log(`listening on *:${PORT}`);

@@ -19,27 +19,6 @@ export enum ItemType {
     Stone,
     Thatch,
     Fiber,
-    // Tools
-    Pickaxe,
-    Hatchet,
-    Spear,
-    // Weapons
-    Sword,
-    Bow,
-    // Armor
-    Helmet,
-    Chestplate,
-    Leggings,
-    Boots,
-    // Food
-    Meat,
-    Berry,
-    // Other
-    Arrow,
-    Campfire,
-    Bed,
-    // Custom
-    Custom
 }
 
 export class Item {
