@@ -64,14 +64,14 @@ export default class ServerLogic {
     on(){
         this.socket.on('connection', (socket) => {
             console.log('a user connected', socket.handshake.address);
-            if(this.bannedIP.includes(socket.handshake.address)) {
-                socket.emit('kick', 'You are banned from this server!');
-                socket.disconnect();
-                return;
-            }
-            this.players.push(new Player('', '', '', socket.id, socket.handshake.address));
 
             socket.on('init', (data) => {
+                this.players.push(new Player('', '', '', socket.id, socket.handshake.address));
+                if(this.bannedIP.includes(socket.handshake.address)) {
+                    socket.emit('kick', 'You are banned from this server!');
+                    socket.disconnect();
+                    return;
+                }
                 if(this.bannedID.includes(data.uuid)) {
                     socket.emit('kick', 'You are banned from this server!');
                     socket.disconnect();
@@ -81,23 +81,16 @@ export default class ServerLogic {
                 this.players[this.players.findIndex((player) => player.socketId === socket.id)].email = data.email;
                 this.players[this.players.findIndex((player) => player.socketId === socket.id)].uuid = data.uuid;
                 socket.emit('init', {
-                    world: {
-                        time: this.time,
-                        weather: this.weather,
-                    },
+                    terrain: this.terrain,
                     player: this.players[this.players.findIndex((player) => player.socketId === socket.id)],
                     entities: this.entities,
                     resources: this.resources,
                     structures: this.structures,
                 });
             })
-
             socket.on('disconnect', () => {
                 console.log('user disconnected');
                 this.players.splice(this.players.findIndex((player) => player.socketId === socket.id), 1);
-            });
-            socket.on('chat message', (msg) => {
-                console.log('message: ' + msg);
             });
         });
         const loop = () => {

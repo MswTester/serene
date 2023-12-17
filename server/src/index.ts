@@ -22,6 +22,7 @@ const config: ServerConfig = {
     date: new Date().toLocaleDateString(),
     maxPlayers: 100,
     socket: io,
+    // file: 'world.json'
 };
 
 const server: ServerLogic = new ServerLogic(config);
