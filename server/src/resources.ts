@@ -1,5 +1,6 @@
 import { Drop, ItemType } from "./items";
 import { Transform } from "./types";
+import { EventEmitter } from 'events';
 
 export enum ResourceType{
     Tree,
@@ -11,8 +12,8 @@ export enum ResourceType{
 export class Resource{
     // pinned values
     readonly type: ResourceType;
-    readonly x: number;
-    readonly y: number;
+    private x: number;
+    private y: number;
     readonly maxHealth: number;
     readonly isCollidable: boolean = true;
     readonly drops: Drop[] = [];
@@ -21,6 +22,7 @@ export class Resource{
     private width: number;
     private height: number;
     private health: number;
+    events: EventEmitter
     constructor(type:ResourceType, x:number, y:number, maxHealth:number, src:string, size:[number, number], isCollidable:boolean, drops:Drop[]){
         this.type = type;
         this.x = x;
@@ -32,9 +34,10 @@ export class Resource{
         this.height = size[1];
         this.isCollidable = isCollidable;
         this.drops = drops;
+        this.events = new EventEmitter();
     }
 
-    toTransform() {
+    getTransform() {
         return {
             x: this.getPosition().x,
             y: this.getPosition().y,
@@ -62,12 +65,16 @@ export class Resource{
         this.health -= amount;
         if(this.health <= 0){
             this.health = 0;
+            this.emit('destroy');
         }
+        this.emit('damageTaken', amount);
     }
 
     getHealth(){return this.health;}
     getPosition(){return {x: this.x, y: this.y};}
     getScale(){return {x: this.width, y: this.height};}
+    setPosition(x:number, y:number){this.x = x; this.y = y;}
+    setScale(width:number, height:number){this.width = width; this.height = height;}
 
     checkCollision(transform:Transform){
         if(this.getPosition().x < transform.x + transform.width &&
@@ -77,5 +84,12 @@ export class Resource{
             return true;
         }
         return false;
+    }
+
+    on(event:string, callback:(...args: any[]) => void){
+        this.events.on(event, callback);
+    }
+    emit(event:string, ...args:any[]){
+        this.events.emit(event, ...args);
     }
 }

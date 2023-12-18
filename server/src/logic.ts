@@ -1,10 +1,11 @@
 import { Server } from "socket.io";
-import { ServerConfig } from "./types";
+import { ServerConfig, Transform } from "./types";
 import { readFileSync, write, writeFileSync } from "fs";
 import { Entity } from "./entities";
 import { Resource } from "./resources";
 import { Structure } from "./structures";
 import { Player } from "./player";
+import { Region } from "./region";
 
 enum Terrain{
     Grass = 0,
@@ -20,9 +21,10 @@ export default class ServerLogic {
     name: string = 'Serene Server';
     description: string = 'Hello World!';
     date: string = new Date().toLocaleDateString();
+    maxPlayers: number = 100;
     socket:Server;
     terrain: Terrain[][] = [];
-    maxPlayers: number = 100;
+    regions: Region[] = [];
     players: Player[] = [];
     entities: Entity[] = [];
     resources: Resource[] = [];
@@ -31,6 +33,7 @@ export default class ServerLogic {
     bannedIP: string[] = [];
     time: number = 0;
     weather: number = 0;
+    chat: string[] = [];
     constructor(config:ServerConfig) {
         this.name = config.name;
         this.description = config.description;
@@ -43,6 +46,7 @@ export default class ServerLogic {
             this.resources = world.resources;
             this.structures = world.structures;
             this.terrain = world.terrain;
+            this.regions = world.regions;
             this.bannedID = world.bannedID;
             this.bannedIP = world.bannedIP;
             this.time = world.time;
@@ -82,7 +86,6 @@ export default class ServerLogic {
                 this.players[this.players.findIndex((player) => player.socketId === socket.id)].uuid = data.uuid;
                 socket.emit('init', {
                     terrain: this.terrain,
-                    player: this.players[this.players.findIndex((player) => player.socketId === socket.id)],
                     entities: this.entities,
                     resources: this.resources,
                     structures: this.structures,
@@ -102,9 +105,55 @@ export default class ServerLogic {
             this.entities.forEach((entity) => {
                 entity.tick();
             });
+            this.regions.forEach((region) => {
+                region.tick(1000 / 60, this);
+            });
             setTimeout(loop, 1000 / 60);
         };
         loop();
+    }
+
+    getCollisions() {
+        let collisions:Transform[] = [];
+        collisions.concat(this.resources.filter((resource) => resource.isCollidable).map((resource) => resource.getTransform()));
+        collisions.concat(this.structures.filter((structure) => structure.isCollidable).map((structure) => structure.getTransform()));
+        return collisions;
+    }
+
+    addEntity(entity:Entity) {
+        this.entities.push(entity);
+        entity.on('destroy', () => {
+            this.removeEntity(entity);
+        });
+    }
+
+    addResource(resource:Resource) {
+        this.resources.push(resource);
+        resource.on('destroy', () => {
+            this.removeResource(resource);
+        });
+    }
+
+    addStructure(structure:Structure) {
+        this.structures.push(structure);
+        structure.on('destroy', () => {
+            this.removeStructure(structure);
+        });
+    }
+
+    removeEntity(entity:Entity) {
+        const index = this.entities.indexOf(entity);
+        if (index !== -1) {this.entities.splice(index, 1);}
+    }
+
+    removeResource(resource:Resource) {
+        const index = this.resources.indexOf(resource);
+        if (index !== -1) {this.resources.splice(index, 1);}
+    }
+
+    removeStructure(structure:Structure) {
+        const index = this.structures.indexOf(structure);
+        if (index !== -1) {this.structures.splice(index, 1);}
     }
 
     saveWorld() {

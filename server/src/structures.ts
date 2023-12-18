@@ -1,5 +1,6 @@
 import { Inventory } from "./inventory";
 import { Transform } from "./types";
+import { EventEmitter } from 'events';
 
 export interface CustomStructureOptions {
     collisionEvent?: Function;
@@ -34,6 +35,7 @@ export class Structure {
     private width: number = 0;
     private height: number = 0;
     private health: number = 0;
+    events: EventEmitter
     constructor(type: structureType, x: number, y: number, maxHealth: number, src: string, size: [number, number], isCollidable: boolean, options?: CustomStructureOptions) {
         this.type = type;
         this.x = x;
@@ -45,9 +47,10 @@ export class Structure {
         this.height = size[1];
         this.isCollidable = isCollidable;
         this.options = options || {};
+        this.events = new EventEmitter();
     }
 
-    toTransform() {
+    getTransform() {
         return {
             x: this.getPosition().x,
             y: this.getPosition().y,
@@ -85,10 +88,19 @@ export class Structure {
         this.health -= amount;
         if(this.health <= 0){
             this.health = 0;
+            this.emit('destroy');
         }
+        this.emit('damageTaken', amount);
     }
 
     getHealth() { return this.health; }
     getPosition() { return { x: this.x, y: this.y }; }
     getScale() { return { x: this.width, y: this.height }; }
+
+    on(event:string, callback:(...args: any[]) => void){
+        this.events.on(event, callback);
+    }
+    emit(event:string, ...args:any[]){
+        this.events.emit(event, ...args);
+    }
 }

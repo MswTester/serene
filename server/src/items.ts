@@ -1,4 +1,5 @@
 import { Entity, EntityType } from "./entities";
+import { EventEmitter } from "events";
 
 export interface CustomItemOptions {
     use?: Function;
@@ -31,6 +32,7 @@ export class Item {
     description: string;
     src: string;
     amount: number;
+    events: EventEmitter
     constructor(type: ItemType, src: string, name: string, description: string, maxStack:number, amount: number, options?: CustomItemOptions) {
         this.type = type;
         this.src = src;
@@ -39,6 +41,7 @@ export class Item {
         this.maxStack = maxStack;
         this.amount = amount;
         this.options = options || {};
+        this.events = new EventEmitter();
     }
 
     toJsonObject() {
@@ -53,9 +56,17 @@ export class Item {
         };
     }
 
+    on(event:string, callback:(...args: any[]) => void){
+        this.events.on(event, callback);
+    }
+    emit(event:string, ...args:any[]){
+        this.events.emit(event, ...args);
+    }
+
     use() {
         if (this.options.use) {
             this.options.use();
+            this.events.emit('use');
         }
     }
 

@@ -8,13 +8,12 @@ export default function Index() {
     const { width, height } = useWindowSize();
     const { lang, user, socket, setSocket, setPage } = useContext(globalContext);
     const [terrain, setTerrain] = useState<number[][]>([]);
-    const [player, setPlayer] = useState<any[]>([]);
     const [entities, setEntities] = useState<any[]>([]);
     const [resources, setResources] = useState<any[]>([]);
     const [structures, setStructures] = useState<any[]>([]);
     const [time, setTime] = useState(0);
     const [weather, setWeather] = useState(0);
-    const [chat, setChat] = useState<any[]>([]);
+    const [chat, setChat] = useState<string[]>([]);
 
     useEffect(() => {
         socket.emit('init', {
@@ -29,13 +28,11 @@ export default function Index() {
         });
         socket.on('init', (data:{
             terrain:number[][];
-            player:any[];
             entities:any[];
             resources:any[];
             structures:any[];
         }) => {
             setTerrain(data.terrain);
-            setPlayer(data.player);
             setEntities(data.entities);
             setResources(data.resources);
             setStructures(data.structures);
