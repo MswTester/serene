@@ -52,6 +52,12 @@ export default class ServerLogic {
             this.time = world.time;
             this.weather = world.weather;
         }
+
+        this.entities.forEach((entity) => {
+            entity.on('destroy', () => {
+                this.removeEntity(entity);
+            });
+        });
     }
 
     getServerInfo() {
@@ -70,7 +76,7 @@ export default class ServerLogic {
             console.log('a user connected', socket.handshake.address);
 
             socket.on('init', (data) => {
-                this.players.push(new Player('', '', '', socket.id, socket.handshake.address));
+                this.players.push(new Player(data.name, data.email, data.uuid, socket.id, socket.handshake.address));
                 if(this.bannedIP.includes(socket.handshake.address)) {
                     socket.emit('kick', 'You are banned from this server!');
                     socket.disconnect();
@@ -81,16 +87,13 @@ export default class ServerLogic {
                     socket.disconnect();
                     return;
                 }
-                this.players[this.players.findIndex((player) => player.socketId === socket.id)].name = data.name;
-                this.players[this.players.findIndex((player) => player.socketId === socket.id)].email = data.email;
-                this.players[this.players.findIndex((player) => player.socketId === socket.id)].uuid = data.uuid;
                 socket.emit('init', {
                     terrain: this.terrain,
                     entities: this.entities,
                     resources: this.resources,
                     structures: this.structures,
                 });
-            })
+            });
             socket.on('disconnect', () => {
                 console.log('user disconnected');
                 this.players.splice(this.players.findIndex((player) => player.socketId === socket.id), 1);

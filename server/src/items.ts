@@ -16,10 +16,10 @@ export interface Drop{
 
 export enum ItemType {
     // Resources
-    Wood,
-    Stone,
-    Thatch,
-    Fiber,
+    Wood = 'Wood',
+    Stone = 'Stone',
+    Thatch = 'Thatch',
+    Fiber = 'Fiber',
 }
 
 export class Item {

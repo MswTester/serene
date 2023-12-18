@@ -11,6 +11,7 @@ export class Inventory{
 
     toJsonObject(){
         return {
+            maxSlots: this.maxSlots,
             items: this.items.map(item => item.toJsonObject())
         };
     }

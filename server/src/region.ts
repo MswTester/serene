@@ -10,7 +10,6 @@ export interface spawnData{
     maxSpawn:number; // 최대 스폰 수
     chance:number; // 스폰 확률 (0~1)
     radius:number; // 스폰 반경
-    offset:number; // 스폰 위치 오프셋
     currentSpawn:number; // 현재 스폰 수
 }
 
@@ -39,7 +38,16 @@ export class Region{
             y: this.getPosition().y,
             width: this.getScale().x,
             height: this.getScale().y,
-            spawn: this.spawn
+            spawn: this.spawn.map(spawn => {return{
+                target: spawn.target.toJsonObject(),
+                amount: spawn.amount,
+                maxInterval: spawn.maxInterval,
+                interval: spawn.interval,
+                maxSpawn: spawn.maxSpawn,
+                chance: spawn.chance,
+                radius: spawn.radius,
+                currentSpawn: spawn.currentSpawn
+            }})
         };
     }
 

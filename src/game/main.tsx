@@ -46,6 +46,8 @@ export default function Index() {
         });
     }, []);
     return <Stage width={width} height={height}>
-        <Container></Container>
+        <Container pivot={[0.5/width, 0.5/height]}>
+            
+        </Container>
     </Stage>
 }

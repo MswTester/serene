@@ -14,14 +14,15 @@ export interface CustomEntityOptions {
     speed?: number;
     collisionEvent?: Function;
     drops?: Drop[];
+    level?: number;
     inventory?: Inventory;
 }
 
 export enum EntityType {
-    Player,
-    Enemy,
-    Projectile,
-    Item,
+    Player = 'Player',
+    Enemy = 'Enemy',
+    Projectile = 'Projectile',
+    Item = 'Item',
 }
 
 export class Entity {
@@ -70,11 +71,8 @@ export class Entity {
             src: this.src,
             x: this.getPosition().x,
             y: this.getPosition().y,
-            dx: this.getVelocity().dx,
-            dy: this.getVelocity().dy,
             width: this.getScale().x,
             height: this.getScale().y,
-            health: this.getHealth()
         };
     }
 
