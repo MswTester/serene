@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 489.37 450.42">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        font-family: H2mjrE, HYMyeongJo-Extra;
+        font-size: 245.85px;
+      }
+
+      .cls-2 {
+        fill: url(#radial-gradient-2);
+      }
+
+      .cls-2, .cls-3 {
+        stroke-width: 0px;
+      }
+
+      .cls-3 {
+        fill: url(#radial-gradient);
+      }
+    </style>
+    <radialGradient id="radial-gradient" cx="244.68" cy="225.21" fx="244.68" fy="225.21" r="361.69" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e81b44"/>
+      <stop offset="1" stop-color="#000"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-2" cx="244.68" cy="225.21" fx="244.68" fy="225.21" r="134.55" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#393839"/>
+      <stop offset="1" stop-color="#000"/>
+    </radialGradient>
+  </defs>
+  <path class="cls-3" d="m489.37,145.93C489.37,65.33,425.6,0,346.93,0c-40.12,0-94.8,20.85-102.24,80.4C237.24,20.85,182.56,0,142.44,0,63.77,0,0,65.33,0,145.93c0,40.25,15.91,76.7,41.64,103.1l-.05.05,202.71,201.35,192.97-191.68c31.81-26.76,52.1-67.36,52.1-112.82Z"/>
+  <polygon class="cls-2" points="244.68 81.38 120.12 153.29 120.12 297.13 244.68 369.05 369.25 297.13 369.25 153.29 244.68 81.38"/>
+  <text class="cls-1" transform="translate(150.1 309.42) scale(1.07 1)"><tspan x="0" y="0">S</tspan></text>
+</svg>
