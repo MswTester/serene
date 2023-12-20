@@ -7,23 +7,12 @@ import { Structure } from "./structures";
 import { Player } from "./player";
 import { Region } from "./region";
 
-enum Terrain{
-    Grass = 0,
-    Dirt = 1,
-    Water = 2,
-    Stone = 3,
-    Sand = 4,
-    Snow = 5,
-    Lava = 6,
-}
-
 export default class ServerLogic {
     name: string = 'Serene Server';
     description: string = 'Hello World!';
     date: string = new Date().toLocaleDateString();
     maxPlayers: number = 100;
     socket:Server;
-    terrain: Terrain[][] = [];
     regions: Region[] = [];
     players: Player[] = [];
     entities: Entity[] = [];
@@ -45,7 +34,6 @@ export default class ServerLogic {
             this.entities = world.entities;
             this.resources = world.resources;
             this.structures = world.structures;
-            this.terrain = world.terrain;
             this.regions = world.regions;
             this.bannedID = world.bannedID;
             this.bannedIP = world.bannedIP;
@@ -88,7 +76,6 @@ export default class ServerLogic {
                     return;
                 }
                 socket.emit('init', {
-                    terrain: this.terrain,
                     entities: this.entities,
                     resources: this.resources,
                     structures: this.structures,
@@ -165,7 +152,6 @@ export default class ServerLogic {
             entities: this.entities,
             resources: this.resources,
             structures: this.structures,
-            terrain: this.terrain,
             bannedID: this.bannedID,
             bannedIP: this.bannedIP,
             time: this.time,

@@ -17,6 +17,7 @@ export class Inventory{
     }
 
     addItem(item:Item){
+        if(this.items.length >= this.maxSlots) return;
         this.items.push(item);
     }
 

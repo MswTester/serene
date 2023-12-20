@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/editor', (req, res) => {
-    res.sendFile(__dirname.replace('\\dist', '').replace('\\src', '') + '/app/editor.html');
+    res.sendFile(__dirname.replace('\\dist', '').replace('\\src', '').replace('/src', '').replace('/dist', '') + '/app/editor.html');
 });
 
 httpServer.listen(PORT, () => {

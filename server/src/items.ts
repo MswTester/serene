@@ -2,7 +2,13 @@ import { Entity, EntityType } from "./entities";
 import { EventEmitter } from "events";
 
 export interface CustomItemOptions {
-    use?: Function;
+    use?: string; // function name
+}
+
+export const useFunctionMap: {[key:string]:Function} = {
+    'wood': () => {
+        console.log('used wood');
+    }
 }
 
 export interface Drop{
@@ -61,13 +67,6 @@ export class Item {
     }
     emit(event:string, ...args:any[]){
         this.events.emit(event, ...args);
-    }
-
-    use() {
-        if (this.options.use) {
-            this.options.use();
-            this.events.emit('use');
-        }
     }
 
     drop(amount: number):Entity {

@@ -8,18 +8,18 @@ export interface CustomStructureOptions {
 }
 
 export enum structureType {
-    Wall,
-    Door,
-    Chest,
-    Furnace,
-    Workbench,
-    CraftingTable,
-    Anvil,
-    EnchantmentTable,
-    Bookshelf,
-    Bed,
-    Campfire,
-    Custom
+    Wall = 'Wall',
+    Door = 'Door',
+    Chest = 'Chest',
+    Furnace = 'Furnace',
+    Workbench = 'Workbench',
+    CraftingTable = 'CraftingTable',
+    Anvil = 'Anvil',
+    EnchantmentTable = 'EnchantmentTable',
+    Bookshelf = 'Bookshelf',
+    Bed = 'Bed',
+    Campfire = 'Campfire',
+    Custom = 'Custom',
 }
 
 export class Structure {
@@ -28,6 +28,7 @@ export class Structure {
     readonly maxHealth: number = 0;
     readonly src: string = '';
     readonly isCollidable: boolean = true;
+    readonly hardness: number = 0;
     readonly options: CustomStructureOptions = {};
     // dynamic values
     private x: number = 0;
@@ -36,7 +37,7 @@ export class Structure {
     private height: number = 0;
     private health: number = 0;
     events: EventEmitter
-    constructor(type: structureType, x: number, y: number, maxHealth: number, src: string, size: [number, number], isCollidable: boolean, options?: CustomStructureOptions) {
+    constructor(type: structureType, x: number, y: number, maxHealth: number, src: string, size: [number, number], hardness:number, isCollidable: boolean, options?: CustomStructureOptions) {
         this.type = type;
         this.x = x;
         this.y = y;
@@ -45,6 +46,7 @@ export class Structure {
         this.src = src;
         this.width = size[0];
         this.height = size[1];
+        this.hardness = hardness;
         this.isCollidable = isCollidable;
         this.options = options || {};
         this.events = new EventEmitter();
@@ -70,7 +72,7 @@ export class Structure {
             y: this.getPosition().y,
             width: this.getScale().x,
             height: this.getScale().y,
-            health: this.getHealth(),
+            hardness: this.hardness,
         };
     }
 

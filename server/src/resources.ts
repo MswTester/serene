@@ -16,6 +16,7 @@ export class Resource{
     private y: number;
     readonly maxHealth: number;
     readonly isCollidable: boolean = true;
+    readonly hardness: number = 0;
     readonly drops: Drop[] = [];
     // dynamic values
     src: string;
@@ -23,7 +24,7 @@ export class Resource{
     private height: number;
     private health: number;
     events: EventEmitter
-    constructor(type:ResourceType, x:number, y:number, maxHealth:number, src:string, size:[number, number], isCollidable:boolean, drops:Drop[]){
+    constructor(type:ResourceType, x:number, y:number, maxHealth:number, src:string, size:[number, number], hardness:number, isCollidable:boolean, drops:Drop[]){
         this.type = type;
         this.x = x;
         this.y = y;
@@ -33,6 +34,7 @@ export class Resource{
         this.width = size[0];
         this.height = size[1];
         this.isCollidable = isCollidable;
+        this.hardness = hardness;
         this.drops = drops;
         this.events = new EventEmitter();
     }
@@ -53,11 +55,11 @@ export class Resource{
             y: this.getPosition().y,
             maxHealth: this.maxHealth,
             isCollidable: this.isCollidable,
+            hardness: this.hardness,
             drops: this.drops,
             src: this.src,
             width: this.getScale().x,
             height: this.getScale().y,
-            health: this.getHealth()
         };
     }
 
