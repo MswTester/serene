@@ -12,13 +12,19 @@
             height: 100%;
             overflow: hidden;
         }
+        body{
+            background-color: #111;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+        }
         canvas {
-            width: 100%;
-            height: 100%;
+            width: 100vh;
+            height: 100vh;
             background-color: #000;
             position: absolute;
             top: 0;
-            left: 0;
+            left: 50%;
+            transform: translate(-50%, 0);
             z-index: -1;
         }
         nav{
@@ -63,46 +69,47 @@
     </style>
 </head>
 <body>
-    <canvas></canvas>
+    <canvas width="10000" height="10000"></canvas>
     <nav>
         <button id="new">New</button>
         <button id="open">Open</button>
         <button id="save">Save</button>
-        <input type="number" name="" id="width" placeholder="width">
-        <input type="number" name="" id="height" placeholder="height">
+        <input type="number" name="" id="width" placeholder="width" value="10000">
+        <input type="number" name="" id="height" placeholder="height" value="10000">
     </nav>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-voronoi.v1.min.js"></script>
     <script>
-        const canvas = document.querySelector('canvas');
-        const ctx = canvas.getContext('2d');
         const nav = document.querySelector('nav');
         const new_btn = nav.querySelector('button#new');
         const open_btn = nav.querySelector('button#open');
         const save_btn = nav.querySelector('button#save');
 
-        const resize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        const canvas = document.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
 
-        window.addEventListener('resize', resize);
-        resize();
+        let points = []
 
-        let position = {x: 0, y: 0};
-        let zoom = 1;
-        let world = {
-            entities: [],
-            resources: [],
-            structures: [],
-            terrain: [],
-            bannedID: [],
-            bannedIP: [],
-            time: 0,
-            weather: 0
-        }
-
-        const createWorld = (width, height) => {
-            let world = new Array(height).fill(0).map(() => new Array(width).fill(0));
-        }
+        new_btn.addEventListener('click', () => {
+            const width = +document.querySelector('input#width').value;
+            const height = +document.querySelector('input#height').value;
+            canvas.width = width || 10000;
+            canvas.height = height || 10000;
+            points = [];
+            points = Array.from({ length: 30 }, () => [Math.random() * canvas.width, Math.random() * canvas.height]);
+            const voronoi = d3.voronoi().extent([[0, 0], [canvas.width, canvas.height]])(points);
+            voronoi.polygons().forEach(polygon => {
+                ctx.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`;
+                ctx.lineWidth = 10;
+                ctx.beginPath();
+                ctx.moveTo(polygon[0][0], polygon[0][1]);
+                for (let i = 1; i < polygon.length; i++) {
+                    ctx.lineTo(polygon[i][0], polygon[i][1]);
+                }
+                ctx.closePath();
+                ctx.fill();
+            });
+        });
     </script>
 </body>
 </html>
