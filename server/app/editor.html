@@ -100,35 +100,67 @@
             let polygons = [];
             sites = [];
 
-            pushToSites(makeSite(0, 100, 0, 360, 1, false), '#6F6', 'forest')
-            const spaceCount = 60
-            for(let i = 0; i < spaceCount; i++){
-                const angle = 360/spaceCount * i;
-                pushToSites(makeSite(4700, 5000, angle-5, angle+5, 1, false), '#003', 'space')
+            const config = {
+                centerForestRange: 100,
+                spaceCount: 60,
+                spaceRange: 0.06,
+                spaceRadius: 10,
+                oceanCount: 20,
+                oceanRadius: 160,
+                oceanRange: [0.76, 0.8],
+                oceanDeepCount:20,
+                oceanDeepRadius: 140,
+                oceanDeepRange: [0.86, 0.9],
+                hellCount: 25,
+                hellRadius: 140,
+                hellRange: [0.8, 0.9],
+                hellLavaCount: 20,
+                hellLavaRadius: 140,
+                hellLavaRange: [0.8, 0.9],
+                outerBiomeCount: 10,
+                outerBiomeRadius: 6,
+                outerBiomeRange: [0.44, 0.6],
+                innerBiomeCount: 7,
+                innerBiomeRadius: 6,
+                innerBiomeRange: [0.2, 0.3],
+            }
+            const mc = Math.floor(Math.min(canvas.width, canvas.height) / 2);
+
+            pushToSites(makeSite(0, config.centerForestRange, 0, 360, 1, false), '#6F6', 'forest')
+            const sr = (config.spaceRadius/2)
+            for(let i = 0; i < config.spaceCount; i++){
+                const angle = 360/config.spaceCount * i;
+                pushToSites(makeSite((1-config.spaceRange)*mc, 1*mc, angle-sr, angle+sr, 1, false), '#003', 'space')
             }
 
-            const oceanAngle = randInt(0, 360);
-            // ocean
-            pushToSites(makeSite(4300, 4500, oceanAngle-70, oceanAngle+70, 20, true), '#00A', 'ocean_deep')
-            pushToSites(makeSite(3800, 4000, oceanAngle-80, oceanAngle+80, 20, true), '#00F', 'ocean')
+            const endAngle = randInt(0, 360);
 
+            const or = (config.oceanRadius/2)
+            const odr = (config.oceanDeepRadius/2)
+            // ocean
+            pushToSites(makeSite(config.oceanDeepRange[0]*mc, config.oceanDeepRange[1]*mc, endAngle-odr, endAngle+odr, config.oceanDeepCount, true), '#00A', 'ocean_deep')
+            pushToSites(makeSite(config.oceanRange[0]*mc, config.oceanRange[1]*mc, endAngle-or, endAngle+or, config.oceanCount, true), '#00F', 'ocean')
+
+            const hr = (config.hellRadius/2)
+            const hlr = (config.hellLavaRadius/2)
             // hell
-            pushToSites(makeSite(4000, 4500, oceanAngle+110, oceanAngle+250, 20, true), '#F00', 'hell')
+            pushToSites(makeSite(config.hellRange[0]*mc, config.hellRange[1]*mc, endAngle+180-hr, endAngle+180+hr, config.hellCount, true), '#D00', 'hell')
+            pushToSites(makeSite(config.hellLavaRange[0]*mc, config.hellLavaRange[1]*mc, endAngle+180-hlr, endAngle+180+hlr, config.hellLavaCount, true), '#F00', 'hell_lava')
             
             // outer 바이옴 생성
             makeSite(2200, 3000, 0, 360, 10, true, 6).forEach((pos, i) => {
                 if(i % 3 == 0){
-                    pushToSites(makeSite(500, 600, 0, 360, 10, true, 3, pos[0], pos[1]), '#3C3', 'jungle');
-                    pushToSites(makeSite(0, 200, 0, 360, 3, true, 2, pos[0], pos[1]), '#3A3', 'jungle_deep');
-                    pushToSites(makeSite(300, 400, 0, 360, 3, true, 2, pos[0], pos[1]), '#069', 'jungle_river');
+                    pushToSites(makeSite(0.1*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]), '#3C3', 'jungle');
+                    pushToSites(makeSite(0, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]), '#3A3', 'jungle_deep');
+                    pushToSites(makeSite(0.06*mc, 0.08*mc, 0, 360, 3, true, 2, pos[0], pos[1]), '#069', 'jungle_river');
                 } else if(i % 3 == 1){
-                    pushToSites(makeSite(550, 600, 0, 360, 10, true, 3, pos[0], pos[1]), '#080', 'swamp');
-                    pushToSites(makeSite(100, 500, 0, 360, 3, true, 3, pos[0], pos[1]), '#099', 'swamp_water');
-                    pushToSites(makeSite(400, 500, 0, 360, 8, true, 2, pos[0], pos[1]), '#963', 'swamp_mud');
+                    pushToSites(makeSite(0.11*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]), '#080', 'swamp');
+                    pushToSites(makeSite(0.02*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]), '#099', 'swamp_water');
+                    pushToSites(makeSite(0.08*mc, 0.1*mc, 0, 360, 8, true, 2, pos[0], pos[1]), '#963', 'swamp_mud');
                 } else if(i % 3 == 2){
-                    pushToSites(makeSite(500, 550, 0, 360, 5, true, 3, pos[0], pos[1]), '#6F6', 'forest');
-                    pushToSites(makeSite(200, 400, 0, 360, 3, true, 3, pos[0], pos[1]), '#6CF', 'forest_deep');
-                    pushToSites(makeSite(100, 300, 0, 360, 3, true, 3, pos[0], pos[1]), '#3A5', 'forest_river');
+                    pushToSites(makeSite(0.1*mc, 0.11*mc, 0, 360, 5, true, 3, pos[0], pos[1]), '#6F6', 'forest');
+                    pushToSites(makeSite(0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]), '#6CF', 'forest_deep');
+                    pushToSites(makeSite(0.02*mc, 0.06*mc, 0, 360, 3, true, 3, pos[0], pos[1]), '#3A5', 'forest_river');
                 }
             })
 

@@ -1,5 +1,12 @@
-import { polygonCentroid } from 'd3';
 import seedrandom from 'seedrandom'
+import Region, { RegionType } from './region';
+import Forest from './regions/forest';
+import Forest_Deep from './regions/forest_deep';
+import Forest_Lake from './regions/forest_lake';
+import Ocean from './regions/ocean';
+import Ocean_Deep from './regions/ocean_deep';
+import Space from './regions/space';
+import Desert from './regions/desert';
 
 /** UUID 생성 */
 export const generateUUID = () => {
@@ -34,7 +41,7 @@ export const seededRandomFloat = (seed:string, min:number, max:number) => {
 /** 다각형 내부의 랜덤한 점을 생성 */
 export const getRandomPositionInPolygon = (polygon: [number, number][]): [number, number] => {
     // 다각형의 centroid를 구합니다.
-    const centroid = polygonCentroid(polygon);
+    const centroid = getPolygonCentroid(polygon);
   
     // 다각형의 각 점과 centroid 사이의 최대 거리를 구합니다.
     let maxDistance = Math.max(...polygon.map(p => Math.hypot(p[0] - centroid[0], p[1] - centroid[1])));
@@ -52,7 +59,7 @@ export const getRandomPositionInPolygon = (polygon: [number, number][]): [number
 }
 
 /** 다각형의 넓이를 구합니다. */
-function getPolygonArea(points: [number, number][]): number {
+export const getPolygonArea = (points: [number, number][]): number => {
     let area = 0;
 
     for (let i = 0; i < points.length; i++) {
@@ -62,4 +69,75 @@ function getPolygonArea(points: [number, number][]): number {
     }
 
     return Math.abs(area / 2);
+}
+
+/** 다각형의 centroid를 구합니다. */
+export const getPolygonCentroid = (polygon: [number, number][]): [number, number] => {
+    let xSum = 0, ySum = 0;
+  
+    for (const [x, y] of polygon) {
+      xSum += x;
+      ySum += y;
+    }
+  
+    return [xSum / polygon.length, ySum / polygon.length];
+}
+
+/** 각도와 거리에 따른 점의 상대좌표를 구합니다. */
+export const getPosByRot = (x:number, y:number, distance:number, angle:number):[number, number] => {
+    const rad = angle * Math.PI / 180;
+    return [x + distance * Math.cos(rad), y + distance * Math.sin(rad)]
+}
+
+/** 시드 기반 사이트 생성 */
+export const makeSite = (seed:string, minDistance:number, maxDistance:number, minAngle:number, maxAngle:number, repeat:number, golgoru:boolean, grange:number, cx:number, cy:number):[number, number][] =>{
+    let poses:[number, number][] = []
+    for(let i = 0; i < repeat; i++){
+        let angle = seededRandomInt(seed, minAngle, maxAngle);
+        if(golgoru){
+            let gap = (maxAngle - minAngle) / repeat
+            angle = minAngle + gap * i + seededRandomInt(seed, -gap / grange, gap / grange);
+        }
+        const distance = seededRandomInt(seed, minDistance, maxDistance);
+        const [x, y] = getPosByRot(cx, cy, distance, angle);
+        poses.push([x, y]);
+    }
+    return shuffle(poses);
+}
+
+/** 배열을 suffle */
+export const shuffle = (array:any[]) => {
+    let currentIndex = array.length,  randomIndex;
+  
+    while (currentIndex != 0) {
+  
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+  
+    return array;
+}
+
+/** RegionType에 따라 Region을 생성합니다. */
+export const createRegion = (type:RegionType, polygon:[number, number][]):Region => {
+    switch(type){
+        case RegionType.Forest:
+            return new Forest(polygon);
+        case RegionType.Forest_Deep:
+            return new Forest_Deep(polygon);
+        case RegionType.Forest_Lake:
+            return new Forest_Lake(polygon);
+        case RegionType.Ocean:
+            return new Ocean(polygon);
+        case RegionType.Ocean_Deep:
+            return new Ocean_Deep(polygon);
+        case RegionType.Desert:
+            return new Desert(polygon);
+        case RegionType.Space:
+            return new Space(polygon);
+        default:
+            return null;
+    }
 }

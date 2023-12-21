@@ -9,7 +9,6 @@ export interface ServerConfig{
     file?: string;
 }
 
-
 export interface Transform{
     x: number;
     y: number;

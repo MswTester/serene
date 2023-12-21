@@ -53,10 +53,3 @@ export enum ItemType{
     // Others
     Wood = 'wood',
 }
-
-export interface ItemDrop{
-    item:new (...args: any[]) => Item;
-    chance:number;
-    min:number;
-    max:number;
-}

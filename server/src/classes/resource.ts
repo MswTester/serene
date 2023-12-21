@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
-import Item, { ItemDrop } from "./item";
+import Item from "./item";
 import { generateUUID } from "./utils";
+import { ItemDrop } from "./types";
 
 export default class Resource{
     readonly type:ResourceType;

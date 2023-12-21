@@ -1,6 +1,5 @@
 import { EventEmitter } from "events";
-import { ItemDrop } from "./item";
-import { Direction } from "./types";
+import { Direction, ItemDrop } from "./types";
 import { generateUUID } from "./utils";
 
 export default class Creature {
@@ -94,7 +93,16 @@ export default class Creature {
 
 export enum CreatureType {
     // Passive
+    Grimlin = 'grimlin',
+    Fairy = 'fairy',
+    Unicorn = 'unicorn',
     // Hostile
+    Wyvern = 'wyvern',
+    Drake = 'drake',
+    Shadow_Beast = 'shadow_beast',
     // Boss
+    Golem = 'golem',
+    Titan = 'titan',
+    Pheonix = 'pheonix',
     // Others
 }
