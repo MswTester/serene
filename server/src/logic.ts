@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { ServerConfig, Transform } from "./types";
 import { readFileSync, write, writeFileSync } from "fs";
-import World from "./classes/world";
+import World, { createWorld } from "./classes/world";
 import Player from "./player";
 
 export default class ServerLogic {
@@ -31,16 +31,7 @@ export default class ServerLogic {
             this.bannedIP = world.bannedIP;
             this.world = new World(world.resources, world.creatures, world.projectiles, world.vehicles, world.structures, world.regions, world.time, world.weather);
         } else {
-            this.world = new World(
-                [],
-                [],
-                [],
-                [],
-                [],
-                [],
-                0,
-                0,
-            );
+            this.world = createWorld();
         }
     }
 

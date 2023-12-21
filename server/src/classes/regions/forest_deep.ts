@@ -1,5 +1,4 @@
 import Region, { RegionType } from '../region';
-import Resource, { ResourceType } from '../resource';
 import Tree from '../resources/tree';
 
 export default class Forest_Deep extends Region{
