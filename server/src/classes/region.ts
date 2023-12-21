@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import Creature from './creature';
-import Resource from './resource';
+import Creature, { CreatureType } from './creature';
+import Resource, { ResourceType } from './resource';
 
 export default class Region {
     readonly type:RegionType;
@@ -45,7 +45,7 @@ export enum RegionType{
     Desert = 'desert',
     Desert_Water = 'desert_water',
     Snow = 'snow',
-    Snow_Water = 'snow_water',
+    Snow_Ice = 'snow_ice',
     Snow_Cave = 'snow_cave',
     Swamp = 'swamp',
     Swamp_Water = 'swamp_water',
@@ -55,9 +55,8 @@ export enum RegionType{
 }
 
 export interface SpawnMap{
-    target:Creature|Resource;
+    target:new (...args: any[]) => Creature | Resource;
     chance:number;
     min:number;
     max:number;
-    // TODO: add spawn conditions
 }

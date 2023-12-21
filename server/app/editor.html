@@ -88,28 +88,134 @@
         const canvas = document.querySelector('canvas');
         const ctx = canvas.getContext('2d');
 
-        let points = []
+        let sites = []
+
+        console.log(d3.polygonArea([[0, 0], [0, 100], [100, 100], [100, 0]]))
 
         new_btn.addEventListener('click', () => {
             const width = +document.querySelector('input#width').value;
             const height = +document.querySelector('input#height').value;
             canvas.width = width || 10000;
             canvas.height = height || 10000;
-            points = [];
-            points = Array.from({ length: 30 }, () => [Math.random() * canvas.width, Math.random() * canvas.height]);
-            const voronoi = d3.voronoi().extent([[0, 0], [canvas.width, canvas.height]])(points);
-            voronoi.polygons().forEach(polygon => {
-                ctx.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`;
-                ctx.lineWidth = 10;
+            let polygons = [];
+            sites = [];
+
+            pushToSites(makeSite(0, 100, 0, 360, 1, false), '#6F6', 'forest')
+            const spaceCount = 60
+            for(let i = 0; i < spaceCount; i++){
+                const angle = 360/spaceCount * i;
+                pushToSites(makeSite(4700, 5000, angle-5, angle+5, 1, false), '#003', 'space')
+            }
+
+            const oceanAngle = randInt(0, 360);
+            // ocean
+            pushToSites(makeSite(4300, 4500, oceanAngle-70, oceanAngle+70, 20, true), '#00A', 'ocean_deep')
+            pushToSites(makeSite(3800, 4000, oceanAngle-80, oceanAngle+80, 20, true), '#00F', 'ocean')
+
+            // hell
+            pushToSites(makeSite(4000, 4500, oceanAngle+110, oceanAngle+250, 20, true), '#F00', 'hell')
+            
+            // outer 바이옴 생성
+            makeSite(2200, 3000, 0, 360, 10, true, 6).forEach((pos, i) => {
+                if(i % 3 == 0){
+                    pushToSites(makeSite(500, 600, 0, 360, 10, true, 3, pos[0], pos[1]), '#3C3', 'jungle');
+                    pushToSites(makeSite(0, 200, 0, 360, 3, true, 2, pos[0], pos[1]), '#3A3', 'jungle_deep');
+                    pushToSites(makeSite(300, 400, 0, 360, 3, true, 2, pos[0], pos[1]), '#069', 'jungle_river');
+                } else if(i % 3 == 1){
+                    pushToSites(makeSite(550, 600, 0, 360, 10, true, 3, pos[0], pos[1]), '#080', 'swamp');
+                    pushToSites(makeSite(100, 500, 0, 360, 3, true, 3, pos[0], pos[1]), '#099', 'swamp_water');
+                    pushToSites(makeSite(400, 500, 0, 360, 8, true, 2, pos[0], pos[1]), '#963', 'swamp_mud');
+                } else if(i % 3 == 2){
+                    pushToSites(makeSite(500, 550, 0, 360, 5, true, 3, pos[0], pos[1]), '#6F6', 'forest');
+                    pushToSites(makeSite(200, 400, 0, 360, 3, true, 3, pos[0], pos[1]), '#6CF', 'forest_deep');
+                    pushToSites(makeSite(100, 300, 0, 360, 3, true, 3, pos[0], pos[1]), '#3A5', 'forest_river');
+                }
+            })
+
+            // inner 바이옴 생성
+            makeSite(1000, 1500, 0, 360, 7, true, 6).forEach((pos, i) => {
+                if(i % 4 == 0){
+                    pushToSites(makeSite(350, 450, 0, 360, 10, true, 3, pos[0], pos[1]), '#777', 'cave');
+                    pushToSites(makeSite(0, 200, 0, 360, 3, true, 2, pos[0], pos[1]), '#444', 'cave_deep');
+                    pushToSites(makeSite(200, 300, 0, 360, 3, true, 2, pos[0], pos[1]), '#222', 'cave_dark');
+                } else if(i % 4 == 1){
+                    pushToSites(makeSite(300, 400, 0, 360, 6, true, 3, pos[0], pos[1]), '#CFF', 'snow');
+                    pushToSites(makeSite(200, 400, 0, 360, 3, true, 3, pos[0], pos[1]), '#ADF', 'snow_ice');
+                    pushToSites(makeSite(100, 200, 0, 360, 3, true, 3, pos[0], pos[1]), '#6DF', 'snow_lake');
+                } else if(i % 4 == 2 || i % 4 == 3){
+                    pushToSites(makeSite(300, 500, 0, 360, 6, true, 3, pos[0], pos[1]), '#FC6', 'desert');
+                    pushToSites(makeSite(200, 500, 0, 360, 3, true, 3, pos[0], pos[1]), '#FA6', 'desert_sandstone');
+                    pushToSites(makeSite(0, 120, 0, 360, 2, true, 2, pos[0], pos[1]), '#3CC', 'desert_oasis');
+                }
+            })
+
+            const voronoi = d3.voronoi().extent([[0, 0], [canvas.width, canvas.height]]);
+
+            const diagram = voronoi(sites.map(site => [site.x, site.y]));
+
+            diagram.polygons().forEach((polygon, i) => {
+                polygon = polygon.map(vertex => [Math.round(vertex[0]), Math.round(vertex[1])]);
+                polygons.push(polygon);
+                // 셀의 점을 찾아서 색을 가져옴
+                const site = sites[i];
+                
+                // 셀의 경계선들을 그림
                 ctx.beginPath();
                 ctx.moveTo(polygon[0][0], polygon[0][1]);
-                for (let i = 1; i < polygon.length; i++) {
-                    ctx.lineTo(polygon[i][0], polygon[i][1]);
-                }
+                polygon.forEach(vertex => {
+                    ctx.lineTo(vertex[0], vertex[1]);
+                });
                 ctx.closePath();
+
+                // 셀을 해당 색으로 채움
+                ctx.fillStyle = site.color;
                 ctx.fill();
+
+                // 셀에 이름을 표시
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = '100px Arial';
+                ctx.fillText(site.name, site.x, site.y);
             });
+
+            console.log(JSON.stringify(polygons));
         });
+
+        function randInt(min, max){
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function randFloat(min, max){
+            return Math.random() * (max - min) + min;
+        }
+
+        function getPosByRot(x, y, distance, angle){
+            const rad = angle * Math.PI / 180;
+            return [x + distance * Math.cos(rad), y + distance * Math.sin(rad)]
+        }
+
+        function makeSite(minDistance, maxDistance, minAngle, maxAngle, repeat = 1, golgoru, grange = 2, cx = 5000, cy = 5000){
+            let poses = []
+            for(let i = 0; i < repeat; i++){
+                let angle = randInt(minAngle, maxAngle);
+                if(golgoru){
+                    let gap = (maxAngle - minAngle) / repeat
+                    angle = minAngle + gap * i + randInt(-gap / grange, gap / grange);
+                }
+                const distance = randInt(minDistance, maxDistance);
+                const [x, y] = getPosByRot(cx, cy, distance, angle);
+                poses.push([x, y]);
+            }
+            return poses;
+        }
+
+        function pushToSites(poses, color, name){
+            for(let i = 0; i < poses.length; i++){
+                const [x, y] = poses[i];
+                sites.push({x, y, color, name});
+            }
+        }
     </script>
 </body>
 </html>

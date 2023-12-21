@@ -51,10 +51,11 @@ export enum ItemType{
     // Consumable
     // Placeable
     // Others
+    Wood = 'wood',
 }
 
 export interface ItemDrop{
-    item:Item;
+    item:new (...args: any[]) => Item;
     chance:number;
     min:number;
     max:number;

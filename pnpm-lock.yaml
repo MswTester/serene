@@ -8,6 +8,9 @@ dependencies:
   '@pixi/react':
     specifier: ^7.1.1
     version: 7.1.1(@babel/runtime@7.23.6)(@pixi/app@7.3.2)(@pixi/constants@7.3.2)(@pixi/core@7.3.2)(@pixi/display@7.3.2)(@pixi/extensions@7.3.2)(@pixi/graphics@7.3.2)(@pixi/math@7.3.2)(@pixi/mesh-extras@7.3.2)(@pixi/mesh@7.3.2)(@pixi/particle-container@7.3.2)(@pixi/sprite-animated@7.3.2)(@pixi/sprite-tiling@7.3.2)(@pixi/sprite@7.3.2)(@pixi/text-bitmap@7.3.2)(@pixi/text@7.3.2)(@pixi/ticker@7.3.2)(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)
+  '@types/node':
+    specifier: ^20.10.5
+    version: 20.10.5
   firebase:
     specifier: ^10.7.1
     version: 10.7.1
@@ -66,7 +69,7 @@ devDependencies:
     version: 5.3.3
   vite:
     specifier: ^5.0.0
-    version: 5.0.7
+    version: 5.0.7(@types/node@20.10.5)
 
 packages:
 
@@ -999,7 +1002,7 @@ packages:
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.7.10
-      '@types/node': 20.10.4
+      '@types/node': 20.10.5
     dev: false
 
   /@grpc/proto-loader@0.7.10:
@@ -1680,11 +1683,10 @@ packages:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
     dev: true
 
-  /@types/node@20.10.4:
-    resolution: {integrity: sha512-D08YG6rr8X90YB56tSIuBaddy/UXAA9RKJoFvrsnogAum/0pmjkgi4+2nx96A330FmioegBWmEYQ+syqCFaveg==}
+  /@types/node@20.10.5:
+    resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}
     dependencies:
       undici-types: 5.26.5
-    dev: false
 
   /@types/offscreencanvas@2019.7.3:
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
@@ -1862,7 +1864,7 @@ packages:
       '@babel/plugin-transform-react-jsx-source': 7.23.3(@babel/core@7.23.5)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.0
-      vite: 5.0.7
+      vite: 5.0.7(@types/node@20.10.5)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3066,7 +3068,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.10.4
+      '@types/node': 20.10.5
       long: 5.2.3
     dev: false
 
@@ -3428,7 +3430,6 @@ packages:
 
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
-    dev: false
 
   /undici@5.26.5:
     resolution: {integrity: sha512-cSb4bPFd5qgR7qr2jYAi0hlX9n5YKK2ONKkLFkxl+v/9BvC0sOpZjBHDBSXc5lWAf5ty9oZdRXytBIHzgUcerw==}
@@ -3476,7 +3477,7 @@ packages:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
     dev: true
 
-  /vite@5.0.7:
+  /vite@5.0.7(@types/node@20.10.5):
     resolution: {integrity: sha512-B4T4rJCDPihrQo2B+h1MbeGL/k/GMAHzhQ8S0LjQ142s6/+l3hHTT095ORvsshj4QCkoWu3Xtmob5mazvakaOw==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -3504,6 +3505,7 @@ packages:
       terser:
         optional: true
     dependencies:
+      '@types/node': 20.10.5
       esbuild: 0.19.9
       postcss: 8.4.32
       rollup: 4.7.0
