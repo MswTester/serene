@@ -3,6 +3,7 @@ import Creature, { CreatureType } from './creature';
 import Resource, { ResourceType } from './resource';
 import Forest from './regions/forest';
 import { SpawnMap } from './types';
+import { getPolygonArea, getRandomPositionInPolygon, isIntersecting, rectToPolygon } from './utils';
 
 export default class Region {
     readonly type:RegionType;
@@ -33,6 +34,27 @@ export default class Region {
 
     emit(event:string, ...args:any[]){
         this.events.emit(event, ...args);
+    }
+
+    getSize():number {
+        return getPolygonArea(this.polygon);
+    }
+
+    getRandomPoint():[number, number] {
+        return getRandomPositionInPolygon(this.polygon);
+    }
+
+    countSourceInRegion(sources:(Creature|Resource)[], sourceType:CreatureType|ResourceType):number {
+        let count = 0;
+        sources.forEach((source) => {
+            if(source.type == sourceType){
+                if(isIntersecting(this.polygon, rectToPolygon(source.x, source.y, source.width, source.height))){
+                    count++;
+                }
+                
+            }
+        });
+        return count;
     }
 }
 

@@ -71,6 +71,10 @@ export enum ItemType{
     Mithril = 'mithril',
     Adamantium = 'adamantium',
     Titanium = 'titanium',
+    Topaz = 'topaz',
+    Ruby = 'ruby',
+    Emerald = 'emerald',
+    Diamond = 'diamond',
     Meteorite = 'meteorite',
     // Others
 }

@@ -6,12 +6,13 @@ import Projectile from "./projectile";
 import Vehicle from "./vehicle";
 import Structure from "./structure";
 import Region, { RegionType } from "./region";
-import { createRegion, generateSeed, makeSite, seededRandomInt } from "./utils";
+import { generateSeed, makeSite, randomFloat, randomInt, seededRandomInt } from "./utils";
+import { createRegion } from './creation';
 
 export default class World{
 
     // world constants
-    spawnTick:number = 18000; // 5 minutes
+    spawnTick:number = 36000; // 10 minutes
     mapWidth:number = 10000;
     mapHeight:number = 10000;
 
@@ -58,12 +59,20 @@ export default class World{
         this.regions.forEach((region) => {
             region.spawns.forEach((spawn) => {
                 if(Math.random() < spawn.chance){
-                    let x = Math.random() * 1000;
-                    let y = Math.random() * 1000;
-                    if(Object.values(CreatureType).includes(spawn.target as CreatureType)){
-                        // this.addCreature();
-                    } else if(Object.values(ResourceType).includes(spawn.target as ResourceType)){
-                        // this.addResource();
+                    let size = region.getSize();
+                    let count = randomInt(spawn.min * size, spawn.max * size);
+                    let spawnLimit = spawn.limit * size
+                    if(spawnLimit > 0){
+                        count = Math.min(count, spawnLimit - region.countSourceInRegion(this.creatures, spawn.target as CreatureType));
+                    }
+                    if(count <= 0) return;
+                    for(let i = 0; i < count; i++){
+                        let [x, y] = region.getRandomPoint();
+                        if(Object.values(CreatureType).includes(spawn.target as CreatureType)){
+                            // this.addCreature();
+                        } else if(Object.values(ResourceType).includes(spawn.target as ResourceType)){
+                            // this.addResource();
+                        }
                     }
                 }
             });
@@ -82,7 +91,7 @@ export default class World{
     }
 
     addResource(resource:Resource){
-        resource.on('death', () => {
+        resource.on('destroy', () => {
             this.removeResource(resource);
         })
         this.resources.push(resource);

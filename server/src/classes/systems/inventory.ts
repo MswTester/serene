@@ -39,6 +39,16 @@ export default class Inventory{
         }
         return false;
     }
+
+    setLength(length:number){
+        if(length > this.Items.length){
+            for(let i = this.Items.length; i < length; i++){
+                this.Items.push(null);
+            }
+        } else if(length < this.Items.length){
+            this.Items.splice(length, this.Items.length - length);
+        }
+    }
 }
 
 export enum SlotType{
