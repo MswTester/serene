@@ -1,4 +1,5 @@
 import { CreatureType } from "./creature";
+import { ItemType } from "./item";
 import { ResourceType } from "./resource";
 
 export enum Direction{
@@ -17,7 +18,7 @@ export interface SpawnMap{
 }
 
 export interface ItemDrop{
-    item:new (...args: any[]) => Item;
+    item:ItemType;
     chance:number;
     min:number;
     max:number;
