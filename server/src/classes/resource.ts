@@ -58,7 +58,11 @@ export default class Resource{
 }
 
 export enum ResourceType{
-    Tree = 'tree',
+    Oak_Tree = 'oak_tree',
+    Cotton_Tree = 'cotton_tree',
+    Baobab_Tree = 'baobab_tree',
+    Palm_Tree = 'palm_tree',
     Stone = 'stone',
     Grass = 'grass',
+    Sandstone = 'sandstone',
 }

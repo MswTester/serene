@@ -50,6 +50,27 @@ export enum ItemType{
     // Equipment
     // Consumable
     // Placeable
-    // Others
+    // Materials
+    Cotton = 'cotton',
+    Thread = 'thread',
+    Fabric = 'fabric',
+    Leather = 'leather',
+    Fur = 'fur',
+    Fiber = 'fiber',
+    // Resources
     Wood = 'wood',
+    Thatch = 'thatch',
+    Stone = 'stone',
+    Flint = 'flint',
+    Iron = 'iron',
+    Iron_Ingot = 'iron_ingot',
+    Aluminum = 'aluminum',
+    Copper = 'copper',
+    Gold = 'gold',
+    Platinum = 'platinum',
+    Mithril = 'mithril',
+    Adamantium = 'adamantium',
+    Titanium = 'titanium',
+    Meteorite = 'meteorite',
+    // Others
 }

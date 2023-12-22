@@ -92,17 +92,27 @@ export default class Creature {
 }
 
 export enum CreatureType {
-    // Passive
-    Grimlin = 'grimlin',
-    Fairy = 'fairy',
-    Unicorn = 'unicorn',
-    // Hostile
-    Wyvern = 'wyvern',
-    Drake = 'drake',
-    Shadow_Beast = 'shadow_beast',
+    // Friendly
+    Grimlin = 'grimlin', // grimlin
+    Unicorn = 'unicorn', // unicorn
+    Chilia = 'chilia', // chinchilla
+    Pegasus = 'pegasus', // pegasus
+    Vambat = 'vambat', // bat
+    Camlia = 'camlia', // camel
+    Lizin = 'lizin', // lizard
+    // Neutral
+    Karicat = 'karicat', // Tiger
+    Scorbian = 'scorbian', // scorpion
+    Polygon = 'polygon', // polabear
+    // Aggressive
+    Wyvern = 'wyvern', // wyvern
+    Drake = 'drake', // drake
+    Shadow_Beast = 'shadow_beast', // shadow beast
+    Deathworm = 'deathworm', // deathworm
     // Boss
-    Golem = 'golem',
-    Titan = 'titan',
-    Pheonix = 'pheonix',
+    Titan = 'titan', // forest boss
+    Golem = 'golem', // cave boss
+    Pheonix = 'pheonix', // hell boss
+    Leviathan = 'leviathan', // ocean boss
     // Others
 }
