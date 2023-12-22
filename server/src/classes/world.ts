@@ -224,8 +224,6 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
         regions.push(createRegion(sites[i][2], polygon.map((point) => [point[0], point[1]])));
     });
 
-    console.log(regions);
-
     return new World(
         resources,
         creatures,
