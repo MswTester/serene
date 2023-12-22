@@ -44,7 +44,7 @@ export default class World{
     }
 
     init(){
-
+        this.spawn();
     }
 
     tick(){
