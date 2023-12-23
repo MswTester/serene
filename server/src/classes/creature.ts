@@ -130,7 +130,7 @@ export enum CreatureType {
     Starlight = 'starlight', // (space) Starlight, 별처럼 빛나는 유령, 테이밍 불가능
 
     // Aggressive
-    Feral_Fox = 'feral_fox', // (forest) Fox, 광포한 여우, 테이밍 가능
+    Feral_Fox = 'feral_fox', // (forest_deep) Fox, 광포한 여우, 테이밍 가능
     Drake = 'drake', // (cave_dark) Drake, 깃털 날개를 가진 드래곤, 테이밍 가능
     Dusk_Panther = 'dusk_panther', // (cave_dark) Dusk panther, 그림자 외형의 표범, 테이밍 가능
     Deathworm = 'deathworm', // (desert) Deathworm, 사막에 사는 거대한 벌레, 테이밍 가능

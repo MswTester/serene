@@ -13,6 +13,7 @@ import Region from '../../server/src/classes/region';
 export default function Index() {
     const { width, height } = useWindowSize();
     const { lang, user, socket, setSocket, setPage } = useContext(globalContext);
+    // Server variables
     const [resources, setResources] = useState<Resource[]>([]);
     const [creatures, setCreatures] = useState<Creature[]>([]);
     const [projectiles, setProjectiles] = useState<Projectile[]>([]);
@@ -22,6 +23,8 @@ export default function Index() {
     const [time, setTime] = useState(0);
     const [weather, setWeather] = useState(0);
     const [chat, setChat] = useState<string[]>([]);
+    // Local variables
+    const [me, setMe] = useState<Creature>();
 
     useEffect(() => {
         socket.emit('init', {
@@ -48,6 +51,12 @@ export default function Index() {
             setVehicles(data.vehicles);
             setStructures(data.structures);
             setRegions(data.regions);
+            let m = data.creatures.find(creature => creature.uuid === user.uid)
+            if(m){
+                setMe(m);
+            } else {
+                // need to create my character
+            }
         });
         socket.on('tickUpdate', (data:{
             time:number;
@@ -57,9 +66,11 @@ export default function Index() {
             setWeather(data.weather);
         });
     }, []);
-    return <Stage width={width} height={height}>
-        <Container pivot={[0.5/width, 0.5/height]}>
-            
-        </Container>
-    </Stage>
+    return <>
+        <Stage width={width} height={height}>
+            <Container pivot={[0.5/width, 0.5/height]}>
+                
+            </Container>
+        </Stage>
+    </>
 }
