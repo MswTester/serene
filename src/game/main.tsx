@@ -3,14 +3,22 @@ import { useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useWindowSize, useInterval } from 'usehooks-ts';
 import { globalContext } from '../App';
+import Resource from '../../server/src/classes/resource';
+import Creature from '../../server/src/classes/creature';
+import Projectile from '../../server/src/classes/projectile';
+import Vehicle from '../../server/src/classes/vehicle';
+import Structure from '../../server/src/classes/structure';
+import Region from '../../server/src/classes/region';
 
 export default function Index() {
     const { width, height } = useWindowSize();
     const { lang, user, socket, setSocket, setPage } = useContext(globalContext);
-    const [terrain, setTerrain] = useState<number[][]>([]);
-    const [entities, setEntities] = useState<any[]>([]);
-    const [resources, setResources] = useState<any[]>([]);
-    const [structures, setStructures] = useState<any[]>([]);
+    const [resources, setResources] = useState<Resource[]>([]);
+    const [creatures, setCreatures] = useState<Creature[]>([]);
+    const [projectiles, setProjectiles] = useState<Projectile[]>([]);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [structures, setStructures] = useState<Structure[]>([]);
+    const [regions, setRegions] = useState<Region[]>([]);
     const [time, setTime] = useState(0);
     const [weather, setWeather] = useState(0);
     const [chat, setChat] = useState<string[]>([]);
@@ -27,15 +35,19 @@ export default function Index() {
             setPage('menu')
         });
         socket.on('init', (data:{
-            terrain:number[][];
-            entities:any[];
-            resources:any[];
-            structures:any[];
+            resources:Resource[];
+            creatures:Creature[];
+            projectiles:Projectile[];
+            vehicles:Vehicle[];
+            structures:Structure[];
+            regions:Region[];
         }) => {
-            setTerrain(data.terrain);
-            setEntities(data.entities);
             setResources(data.resources);
+            setCreatures(data.creatures);
+            setProjectiles(data.projectiles);
+            setVehicles(data.vehicles);
             setStructures(data.structures);
+            setRegions(data.regions);
         });
         socket.on('tickUpdate', (data:{
             time:number;

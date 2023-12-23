@@ -8,6 +8,7 @@ import Structure from "./structure";
 import Region, { RegionType } from "./region";
 import { generateSeed, makeSite, randomFloat, randomInt, seededRandomInt } from "./utils";
 import { createRegion } from './creation';
+import { Point, Polygon, SpawnMap } from './types';
 
 export default class World{
 
@@ -56,8 +57,8 @@ export default class World{
     }
 
     spawn(){
-        this.regions.forEach((region) => {
-            region.spawns.forEach((spawn) => {
+        this.regions.forEach((region:Region) => {
+            region.spawns.forEach((spawn:SpawnMap) => {
                 if(Math.random() < spawn.chance){
                     let size = region.getSize();
                     let count = randomInt(spawn.min * size, spawn.max * size);
@@ -229,8 +230,8 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     })
 
     let diagram = voronoi().extent([[0,0],[width, height]])(sites.map((site) => [site[0], site[1]]));
-    diagram.polygons().forEach((polygon, i) => {
-        regions.push(createRegion(sites[i][2], polygon.map((point) => [point[0], point[1]])));
+    diagram.polygons().forEach((polygon:Polygon, i:number) => {
+        regions.push(createRegion(sites[i][2], polygon.map((point:Point) => [point[0], point[1]])));
     });
 
     return new World(

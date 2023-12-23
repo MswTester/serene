@@ -1,5 +1,5 @@
-import { Server } from "socket.io";
-import { ServerConfig, Transform } from "./types";
+import { Server, Socket } from "socket.io";
+import { ServerConfig } from "./types";
 import { readFileSync, write, writeFileSync } from "fs";
 import World, { createWorld } from "./classes/world";
 import Player from "./player";
@@ -47,10 +47,10 @@ export default class ServerLogic {
     }
 
     on(){
-        this.socket.on('connection', (socket) => {
+        this.socket.on('connection', (socket:Socket) => {
             console.log('a user connected', socket.handshake.address);
 
-            socket.on('init', (data) => {
+            socket.on('init', (data:{name:string;email:string;uuid:string}) => {
                 this.players.push(new Player(data.name, data.email, data.uuid, socket.id, socket.handshake.address));
                 if(this.bannedIP.includes(socket.handshake.address)) {
                     socket.emit('kick', 'You are banned from this server!');

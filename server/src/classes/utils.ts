@@ -1,4 +1,5 @@
 import seedrandom from 'seedrandom'
+import { Point, Polygon } from './types';
 
 /** UUID 생성 */
 export const generateUUID = () => {
@@ -133,15 +134,15 @@ export const rectToPolygon = (x:number, y:number, width:number, height:number):[
 }
 
 /** 다각형과 다각형의 충돌 */
-export function isIntersecting(polygon: [number, number][], polygon2: [number, number][]): boolean {
+export function isIntersecting(polygon: Polygon, polygon2: Polygon): boolean {
 
     // 선분 교차 판별 함수
-    function checkIntersection(p1: [number, number], p2: [number, number], q1: [number, number], q2: [number, number]): boolean {
-        function cross(p: [number, number], q: [number, number]): number {
+    function checkIntersection(p1: Point, p2: Point, q1: Point, q2: Point): boolean {
+        function cross(p: Point, q: Point): number {
             return p[0] * q[1] - p[1] * q[0];
         }
 
-        function subtract(p: [number, number], q: [number, number]): [number, number] {
+        function subtract(p: Point, q: Point): Point {
             return [p[0] - q[0], p[1] - q[1]];
         }
 

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { ServerConfig } from './types';
@@ -27,13 +27,13 @@ const config: ServerConfig = {
 
 const server: ServerLogic = new ServerLogic(config);
 
-app.use((req, res, next) => {
+app.use((_req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.json({
         online: server.getServerInfo().online,
         name: server.getServerInfo().name,
@@ -44,7 +44,7 @@ app.get('/', (req, res) => {
     });
 });
 
-app.get('/editor', (req, res) => {
+app.get('/editor', (_req, res) => {
     res.sendFile(__dirname.replace('\\dist', '').replace('\\src', '').replace('/src', '').replace('/dist', '') + '/app/editor.html');
 });
 

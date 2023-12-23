@@ -24,6 +24,7 @@ import Hell from './regions/hell';
 import Hell_Lava from './regions/hell_lava';
 import Creature, { CreatureType } from './creature';
 import Resource, { ResourceType } from './resource';
+import Oak_Tree from './resources/oak_tree';
 
 /** RegionType에 따라 Region을 생성합니다. */
 export const createRegion = (type:RegionType, polygon:[number, number][]):Region => {
@@ -74,8 +75,6 @@ export const createRegion = (type:RegionType, polygon:[number, number][]):Region
             return new Hell_Lava(polygon);
         case RegionType.Space:
             return new Space(polygon);
-        default:
-            return null;
     }
 }
 
@@ -91,8 +90,7 @@ export const createCreature = (type:CreatureType, x:number, y:number):Creature =
 /** ResourceType에 따라 Resource 생성 */
 export const createResource = (type:ResourceType, x:number, y:number):Resource => {
     switch(type){
-        // case ResourceType:
-        default:
-            return null;
+        case ResourceType.Oak_Tree:
+            return new Oak_Tree(x, y);
     }
 }

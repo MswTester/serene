@@ -23,3 +23,14 @@ export interface ItemDrop{
     min:number;
     max:number;
 }
+
+
+export interface Transform{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+export type Point = [number, number];
+export type Polygon = Point[];
