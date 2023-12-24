@@ -22,6 +22,7 @@ const config: ServerConfig = {
     date: new Date().toLocaleDateString(),
     maxPlayers: 100,
     socket: io,
+    adminPassword: 'jkds',
     // file: 'world.json'
 };
 
@@ -44,11 +45,23 @@ app.get('/', (_req, res) => {
     });
 });
 
+const clearRoute = (string: string): string => {
+    return string.replace('\\dist', '').replace('\\src', '').replace('/src', '').replace('/dist', '')
+}
+
 app.get('/editor', (_req, res) => {
-    res.sendFile(__dirname.replace('\\dist', '').replace('\\src', '').replace('/src', '').replace('/dist', '') + '/app/editor.html');
+    res.sendFile(clearRoute(__dirname) + '/app/editor.html');
 });
+
+app.get('/admin', (req, res) => {
+    if(req.query['pw'] == config.adminPassword){
+        res.sendFile(clearRoute(__dirname) + '/app/admin.html');
+    } else {
+        res.send('Wrong Password');
+    }
+})
 
 httpServer.listen(PORT, () => {
     server.on()
-    console.log(`listening on *:${PORT}`);
+    console.log(`listening on *:${PORT}\nAdmin Password : ${config.adminPassword}`);
 });

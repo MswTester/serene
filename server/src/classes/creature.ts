@@ -65,6 +65,7 @@ export default class Creature {
         this.events = new EventEmitter();
         this.level = level;
         this.exp = exp;
+        this.state = this.stateTypes[0];
         this.health = this.baseHealth * (1+this.level/100);
         this.food = this.baseFood * (1+this.level/100);
         this.x = x;

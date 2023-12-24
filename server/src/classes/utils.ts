@@ -96,12 +96,12 @@ export const getPosByRot = (x:number, y:number, distance:number, angle:number):[
 export const makeSite = (seed:string, minDistance:number, maxDistance:number, minAngle:number, maxAngle:number, repeat:number, golgoru:boolean, grange:number, cx:number, cy:number):[number, number][] =>{
     let poses:[number, number][] = []
     for(let i = 0; i < repeat; i++){
-        let angle = seededRandomInt(seed, minAngle, maxAngle);
+        let angle = seededRandomInt(rotateHex(seed, i), minAngle, maxAngle);
         if(golgoru){
             let gap = (maxAngle - minAngle) / repeat
-            angle = minAngle + gap * i + seededRandomInt(seed, -gap / grange, gap / grange);
+            angle = minAngle + gap * i + seededRandomInt(rotateHex(seed, i), -gap / grange, gap / grange);
         }
-        const distance = seededRandomInt(seed, minDistance, maxDistance);
+        const distance = seededRandomInt(rotateHex(seed, i), minDistance, maxDistance);
         const [x, y] = getPosByRot(cx, cy, distance, angle);
         poses.push([x, y]);
     }
@@ -173,4 +173,30 @@ export function isIntersecting(polygon: Polygon, polygon2: Polygon): boolean {
     }
 
     return false;
+}
+
+export const rotateHex = (hexString: string, n: number): string => {
+    const hexCharacters = "0123456789ABCDEF";
+  
+    // hexString의 길이를 로테이션 횟수로 나눈 나머지만큼 로테이션 수행
+    const rotationCount = n % hexString.length;
+  
+    if (rotationCount === 0) {
+      return hexString; // 로테이션 횟수가 0이면 변화 없이 반환
+    }
+  
+    let result = "";
+  
+    for (let i = 0; i < hexString.length; i++) {
+      const char = hexString[i];
+      const charIndex = hexCharacters.indexOf(char);
+      if (charIndex === -1) {
+        result += char;
+      } else {
+        const newIndex = (charIndex + rotationCount) % 16;
+        result += hexCharacters[newIndex];
+      }
+    }
+  
+    return result;
 }

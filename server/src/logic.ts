@@ -50,6 +50,7 @@ export default class ServerLogic {
         this.socket.on('connection', (socket:Socket) => {
             console.log('a user connected', socket.handshake.address);
 
+            // ingame
             socket.on('init', (data:{name:string;email:string;uuid:string}) => {
                 this.players.push(new Player(data.name, data.email, data.uuid, socket.id, socket.handshake.address));
                 if(this.bannedIP.includes(socket.handshake.address)) {
@@ -71,6 +72,19 @@ export default class ServerLogic {
                     regions: this.world.getWorldObjects().regions,
                 });
             });
+
+            // admin
+            socket.on('admin', () => {
+                console.log('admin connected');
+                socket.emit('admin', {
+                    resources: this.world.getWorldObjects().resources,
+                    creatures: this.world.getWorldObjects().creatures,
+                    projectiles: this.world.getWorldObjects().projectiles,
+                    vehicles: this.world.getWorldObjects().vehicles,
+                    structures: this.world.getWorldObjects().structures,
+                    regions: this.world.getWorldObjects().regions,
+                });
+            })
             socket.on('disconnect', () => {
                 console.log('user disconnected');
                 this.players.splice(this.players.findIndex((player) => player.socketId === socket.id), 1);

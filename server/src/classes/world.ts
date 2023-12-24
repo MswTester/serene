@@ -6,7 +6,7 @@ import Projectile from "./projectile";
 import Vehicle from "./vehicle";
 import Structure from "./structure";
 import Region, { RegionType } from "./region";
-import { generateSeed, makeSite, randomFloat, randomInt, seededRandomInt } from "./utils";
+import { generateSeed, makeSite, randomFloat, randomInt, rotateHex, seededRandomInt } from "./utils";
 import { createRegion } from './creation';
 import { Point, Polygon, SpawnMap } from './types';
 
@@ -130,6 +130,9 @@ export default class World{
 }
 
 export const createWorld = (width:number = 10000, height:number = 10000, seed:string = generateSeed()):World => {
+    console.log('Creating World...');
+    console.log('Seed : ' + seed)
+    
     let resources:Resource[] = [];
     let creatures:Creature[] = [];
     let projectiles:Projectile[] = [];
@@ -165,73 +168,99 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     }
     const mc:number = Math.floor(Math.min(width, height) / 2);
     const center:[number, number] = [width / 2, height / 2];
+    let curSeed = seed;
 
-    makeSite(seed, 0, config.centerForestRange, 0, 360, 1, false, 1, ...center).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
+    makeSite(curSeed, 0, config.centerForestRange, 0, 360, 1, false, 1, ...center).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
+    curSeed = rotateHex(curSeed, 1);
     const sr = (config.spaceRadius/2)
     for(let i = 0; i < config.spaceCount; i++){
         const angle = 360/config.spaceCount * i;
-        makeSite(seed, (1-config.spaceRange)*mc, 1*mc, angle-sr, angle+sr, 1, false, 1, ...center).forEach((pos) => {sites.push([...pos, RegionType.Space])})
+        makeSite(rotateHex(curSeed, 1+config.spaceCount*i), (1-config.spaceRange)*mc, 1*mc, angle-sr, angle+sr, 1, false, 1, ...center).forEach((pos) => {sites.push([...pos, RegionType.Space])})
+        curSeed = rotateHex(curSeed, 1);
     }
 
-    const endAngle = seededRandomInt(seed, 0, 360);
+    const endAngle = seededRandomInt(curSeed, 0, 360);
+    curSeed = rotateHex(curSeed, 1);
 
     const or = (config.oceanRadius/2)
     const odr = (config.oceanDeepRadius/2)
     // ocean
-    makeSite(seed, config.oceanDeepRange[0]*mc, config.oceanDeepRange[1]*mc, endAngle-odr, endAngle+odr, config.oceanDeepCount, true, 2, ...center).forEach((pos) => {
+    makeSite(curSeed, config.oceanDeepRange[0]*mc, config.oceanDeepRange[1]*mc, endAngle-odr, endAngle+odr, config.oceanDeepCount, true, 2, ...center).forEach((pos) => {
         sites.push([...pos, RegionType.Ocean_Deep])
     });
-    makeSite(seed, config.oceanRange[0]*mc, config.oceanRange[1]*mc, endAngle-or, endAngle+or, config.oceanCount, true, 2, ...center).forEach((pos) => {
+    curSeed = rotateHex(curSeed, config.oceanDeepCount);
+    makeSite(curSeed, config.oceanRange[0]*mc, config.oceanRange[1]*mc, endAngle-or, endAngle+or, config.oceanCount, true, 2, ...center).forEach((pos) => {
         sites.push([...pos, RegionType.Ocean])
     });
+    curSeed = rotateHex(curSeed, config.oceanCount);
 
     const hr = (config.hellRadius/2)
     const hlr = (config.hellLavaRadius/2)
     // hell
-    makeSite(seed, config.hellRange[0]*mc, config.hellRange[1]*mc, endAngle+180-hr, endAngle+180+hr, config.hellCount, true, 2, ...center).forEach((pos) => {
+    makeSite(curSeed, config.hellRange[0]*mc, config.hellRange[1]*mc, endAngle+180-hr, endAngle+180+hr, config.hellCount, true, 2, ...center).forEach((pos) => {
         sites.push([...pos, RegionType.Hell])
     })
-    makeSite(seed, config.hellLavaRange[0]*mc, config.hellLavaRange[1]*mc, endAngle+180-hlr, endAngle+180+hlr, config.hellLavaCount, true, 2, ...center).forEach((pos) => {
+    curSeed = rotateHex(curSeed, config.hellCount);
+    makeSite(curSeed, config.hellLavaRange[0]*mc, config.hellLavaRange[1]*mc, endAngle+180-hlr, endAngle+180+hlr, config.hellLavaCount, true, 2, ...center).forEach((pos) => {
         sites.push([...pos, RegionType.Hell_Lava])
     })
+    curSeed = rotateHex(curSeed, config.hellLavaCount);
     
     // outer 바이옴 생성
-    makeSite(seed, 2200, 3000, 0, 360, 10, true, 6, ...center).forEach((pos, i) => {
+    makeSite(curSeed, 2200, 3000, 0, 360, 10, true, 6, ...center).forEach((pos, i) => {
         if(i % 3 == 0){
-            makeSite(seed, 0.1*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle])})
-            makeSite(seed, 0, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_Deep])})
-            makeSite(seed, 0.06*mc, 0.08*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_River])})
+            makeSite(curSeed, 0.1*mc, 0.12*mc, 0, 360, 9, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle])})
+            curSeed = rotateHex(curSeed, 9);
+            makeSite(curSeed, 0, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_Deep])})
+            curSeed = rotateHex(curSeed, 3);
+            makeSite(curSeed, 0.06*mc, 0.08*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_River])})
+            curSeed = rotateHex(curSeed, 3);
         } else if(i % 3 == 1){
-            makeSite(seed, 0.11*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp])})
-            makeSite(seed, 0.02*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Water])})
-            makeSite(seed, 0.08*mc, 0.1*mc, 0, 360, 8, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Mud])})
+            makeSite(curSeed, 0.11*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp])})
+            curSeed = rotateHex(curSeed, 10);
+            makeSite(curSeed, 0.02*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Water])})
+            curSeed = rotateHex(curSeed, 3);
+            makeSite(curSeed, 0.08*mc, 0.1*mc, 0, 360, 8, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Mud])})
+            curSeed = rotateHex(curSeed, 8);
         } else if(i % 3 == 2){
-            makeSite(seed, 0.1*mc, 0.11*mc, 0, 360, 5, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
-            makeSite(seed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Deep])})
-            makeSite(seed, 0.02*mc, 0.06*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
+            makeSite(curSeed, 0.1*mc, 0.11*mc, 0, 360, 5, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
+            curSeed = rotateHex(curSeed, 5);
+            makeSite(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Deep])})
+            curSeed = rotateHex(curSeed, 3);
+            makeSite(curSeed, 0.02*mc, 0.06*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
+            curSeed = rotateHex(curSeed, 3);
         }
     })
 
     // inner 바이옴 생성
-    makeSite(seed, 1000, 1500, 0, 360, 7, true, 6, ...center).forEach((pos, i) => {
+    makeSite(curSeed, 1000, 1500, 0, 360, 7, true, 6, ...center).forEach((pos, i) => {
         if(i % 4 == 0){
-            makeSite(seed, 0.07*mc, 0.09*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave])})
-            makeSite(seed, 0*mc, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Deep])})
-            makeSite(seed, 0.04*mc, 0.06*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Dark])})
+            makeSite(curSeed, 0.07*mc, 0.09*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave])})
+            curSeed = rotateHex(curSeed, 10);
+            makeSite(curSeed, 0*mc, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Deep])})
+            curSeed = rotateHex(curSeed, 3);
+            makeSite(curSeed, 0.04*mc, 0.06*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Dark])})
+            curSeed = rotateHex(curSeed, 3);
         } else if(i % 4 == 1){
-            makeSite(seed, 0.06*mc, 0.08*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow])})
-            makeSite(seed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Ice])})
-            makeSite(seed, 0.02*mc, 0.04*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Lake])})
+            makeSite(curSeed, 0.06*mc, 0.08*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow])})
+            curSeed = rotateHex(curSeed, 6);
+            makeSite(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Ice])})
+            curSeed = rotateHex(curSeed, 3);
+            makeSite(curSeed, 0.02*mc, 0.04*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Lake])})
+            curSeed = rotateHex(curSeed, 3);
         } else if(i % 4 == 2 || i % 4 == 3){
-            makeSite(seed, 0.06*mc, 0.1*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert])})
-            makeSite(seed, 0.04*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Sandstone])})
-            makeSite(seed, 0, 0.024*mc, 0, 360, 2, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Oasis])})
+            makeSite(curSeed, 0.06*mc, 0.1*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert])})
+            curSeed = rotateHex(curSeed, 3);
+            makeSite(curSeed, 0.04*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Sandstone])})
+            curSeed = rotateHex(curSeed, 3);
+            makeSite(curSeed, 0, 0.024*mc, 0, 360, 2, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Oasis])})
+            curSeed = rotateHex(curSeed, 2);
         }
     })
 
     let diagram = voronoi().extent([[0,0],[width, height]])(sites.map((site) => [site[0], site[1]]));
     diagram.polygons().forEach((polygon:Polygon, i:number) => {
-        regions.push(createRegion(sites[i][2], polygon.map((point:Point) => [point[0], point[1]])));
+        regions.push(createRegion(sites[i][2], polygon.map((point:Point) => [Math.round(point[0]), Math.round(point[1])])));
     });
 
     return new World(

@@ -4,8 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            background-color: #000;
+            width: 100vw;
+            height: 100vh;
+        }
+        canvas{
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+    </style>
 </head>
 <body>
+    <canvas></canvas>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
@@ -13,8 +31,175 @@
         socket.emit('admin');
 
         socket.on('admin', (data) => {
-            console.log(data);
+            let world = data;
+            let size = JSON.stringify(world).length
+            let initialMessage = [
+                `You are the admin of this world.`,
+                '',
+                `World size: ${displaceByte(size)}`
+            ];
+            console.log(initialMessage.join('\n'));
+            console.log(world);
+
+            const canvas = document.querySelector('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const resize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            let zoom = 0.1;
+            let pos = [0, 0];
+
+            window.addEventListener('wheel', (e) => {
+                zoom += e.deltaY * 0.0001;
+                zoom = Math.max(0.01, zoom);
+            });
+
+            let keys = {};
+            window.addEventListener('keydown', (e) => {
+                keys[e.key] = true;
+            });
+            window.addEventListener('keyup', (e) => {
+                keys[e.key] = false;
+            });
+
+            let lastTime = Date.now();
+
+            const update = () => {
+                let time = Date.now();
+                let delta = time - lastTime;
+                lastTime = time;
+
+                if(keys['ArrowLeft']){
+                    pos[0] += delta / zoom;
+                }
+                if(keys['ArrowRight']){
+                    pos[0] -= delta / zoom;
+                }
+                if(keys['ArrowUp']){
+                    pos[1] += delta / zoom;
+                }
+                if(keys['ArrowDown']){
+                    pos[1] -= delta / zoom;
+                }
+            }
+
+            const render = () => {
+                update();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                world.regions.map(region => [region.polygon, region.type]).forEach(([polygon, type]) => {
+                    polygon = polygon.map(([x, y]) => [(canvas.width/2) + x * zoom + pos[0] * zoom, (canvas.height/2) + y * zoom + pos[1] * zoom]);
+                    ctx.fillStyle = getColor(type);
+                    ctx.beginPath();
+                    ctx.moveTo(polygon[0][0], polygon[0][1]);
+                    polygon.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+                    ctx.closePath();
+                    ctx.fill();
+                });
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '20px monospace';
+                ctx.fillText(`Zoom: ${zoom.toFixed(2)}`, 10, 30);
+                ctx.fillText(`Position: ${pos[0].toFixed(2)}, ${pos[1].toFixed(2)}`, 10, 60);
+                ctx.fillText(`World size: ${displaceByte(size)}`, 10, 90);
+                ctx.fillText(`Regions: ${world.regions.length}`, 10, 120);
+                ctx.fillText(`Resource: ${world.resources.length}`, 10, 150);
+                ctx.fillText(`Creatures: ${world.creatures.length}`, 10, 180);
+                ctx.fillText(`Projectiles: ${world.projectiles.length}`, 10, 210);
+
+                requestAnimationFrame(render);
+            }
+            render()
+
+
         });
+
+        function getColor(type){
+            let color = '#000';
+            switch(type){
+                case 'forest':
+                    color = '#6f6';
+                    break;
+                case 'space':
+                    color = '#003';
+                    break;
+                case 'ocean_deep':
+                    color = '#00a';
+                    break;
+                case 'ocean':
+                    color = '#00f';
+                    break;
+                case 'hell':
+                    color = '#d00';
+                    break;
+                case 'hell_lava':
+                    color = '#f00';
+                    break;
+                case 'jungle':
+                    color = '#3c3';
+                    break;
+                case 'jungle_deep':
+                    color = '#3a3';
+                    break;
+                case 'jungle_river':
+                    color = '#069';
+                    break;
+                case 'swamp':
+                    color = '#080';
+                    break;
+                case 'swamp_mud':
+                    color = '#963';
+                    break;
+                case 'swamp_water':
+                    color = '#099';
+                    break;
+                case 'forest_deep':
+                    color = '#6cf';
+                    break;
+                case 'forest_lake':
+                    color = '#3a5';
+                    break;
+                case 'cave':
+                    color = '#777';
+                    break;
+                case 'cave_deep':
+                    color = '#444';
+                    break;
+                case 'cave_dark':
+                    color = '#222';
+                    break;
+                case 'snow':
+                    color = '#cff';
+                    break;
+                case 'snow_ice':
+                    color = '#adf';
+                    break;
+                case 'snow_lake':
+                    color = '#6df';
+                    break;
+                case 'desert':
+                    color = '#fc6';
+                    break;
+                case 'desert_sandstone':
+                    color = '#fa6';
+                    break;
+                case 'desert_oasis':
+                    color = '#3cc';
+                    break;
+            }
+            return color;
+        }
+
+        function displaceByte(number, n = 0){
+            return number / 1024 > 1 ? displaceByte(number / 1024, n + 1) : number.toFixed(2) + ['B', 'KB', 'MB', 'GB', 'TB'][n];
+        }
     </script>
 </body>
 </html>
