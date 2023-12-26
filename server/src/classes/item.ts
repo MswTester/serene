@@ -43,6 +43,14 @@ export default class Item{
     emit(event:string, ...args:any[]){
         this.events.emit(event, ...args);
     }
+
+    getSaveFormat(){
+        return {
+            type: this.type,
+            uuid: this.uuid,
+            quantity: this.quantity,
+        }
+    }
 }
 
 export enum ItemType{

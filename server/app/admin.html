@@ -20,10 +20,61 @@
             height: 100vh;
             display: block;
         }
+        div.chat{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            height: 300px;
+            background-color: #00000033;
+            width: 400px;
+            display: flex;
+            color: white;
+            flex-direction: column;
+            align-items: center;
+            font-size: large;
+            font-family: monospace;
+        }
+        div.chatbox{
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        div.chatbox::-webkit-scrollbar{
+            width: 10px;
+        }
+        div.chatbox::-webkit-scrollbar-thumb{
+            background-color: #ffffff33;
+            border-radius: 10px;
+        }
+        div.chatbox::-webkit-scrollbar-track{
+            background-color: #00000033;
+        }
+
+        div.chatbox p{
+            width: 100%;
+            padding: 5px;
+        }
+        input#chat-input{
+            width: 100%;
+            background-color: #ffffff33;
+            color: #fff;
+            font-size: 20px;
+            border: none;
+            outline: none;
+            padding: 10px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
     <canvas></canvas>
+    <div class="chat">
+        <div class="chatbox"></div>
+        <input type="text" name="" id="chat-input" placeholder="Press 'Enter' to input chat." />
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
@@ -33,17 +84,49 @@
         socket.on('admin', (data) => {
             let world = data;
             let size = JSON.stringify(world).length
-            let initialMessage = [
-                `You are the admin of this world.`,
-                '',
-                `World size: ${displaceByte(size)}`
-            ];
-            console.log(initialMessage.join('\n'));
             console.log(world);
 
             const canvas = document.querySelector('canvas');
             const ctx = canvas.getContext('2d');
-            
+
+            const chat = document.querySelector('input#chat-input');
+            chat.addEventListener('keydown', (e) => {
+                if(e.key == 'Enter'){
+                    if(chat.value == '') return;
+                    if(chat.value == '/clear'){
+                        document.querySelectorAll('div.chat p').forEach(p => p.remove());
+                        return;
+                    }
+                    if(chat.value.split('')[0] == '/'){
+                        socket.emit('command', chat.value);
+                        chat.value = '';
+                        return;
+                    }
+                    socket.emit('chat', chat.value);
+                    chat.value = '';
+                }
+            });
+
+            const chatLog = document.querySelector('div.chatbox');
+
+            const addToChat = (message) => {
+                let p = document.createElement('p');
+                p.innerText = message;
+                chatLog.appendChild(p);
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }
+
+            addToChat('Connected to server.')
+            addToChat(`Loaded world size: ${displaceByte(size)}`)
+
+            socket.on('chat', (data) => {
+                addToChat(data);
+            });
+
+            socket.on('command-response', (data) => {
+                addToChat(data);
+            });
+
             const resize = () => {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
@@ -55,13 +138,21 @@
             let pos = [0, 0];
 
             window.addEventListener('wheel', (e) => {
-                zoom += e.deltaY * 0.0001;
+                if(e.target != canvas) return;
+                zoom += e.deltaY * (zoom/1000);
                 zoom = Math.max(0.01, zoom);
             });
 
             let keys = {};
             window.addEventListener('keydown', (e) => {
+                if(chat === document.activeElement) return;
                 keys[e.key] = true;
+                if(e.code == 'KeyR'){
+                    zoom = 0.1;
+                    pos = [0, 0];
+                } else if(e.code == 'Enter'){
+                    chat.focus();
+                }
             });
             window.addEventListener('keyup', (e) => {
                 keys[e.key] = false;
@@ -88,6 +179,12 @@
                 }
             }
 
+            socket.on('spawn', (data) => {
+                world.resources.push(...data[0]);
+                world.creatures.push(...data[1]);
+                size = JSON.stringify(world).length
+            });
+        
             const render = () => {
                 update();
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -104,6 +201,13 @@
                     ctx.fill();
                 });
 
+                world.resources.forEach(resource => {
+                    ctx.fillStyle = getColor(resource.type);
+                    ctx.beginPath();
+                    ctx.arc((canvas.width/2) + resource.x * zoom + pos[0] * zoom, (canvas.height/2) + resource.y * zoom + pos[1] * zoom, 1*zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
                 ctx.fillStyle = '#fff';
                 ctx.font = '20px monospace';
                 ctx.fillText(`Zoom: ${zoom.toFixed(2)}`, 10, 30);
@@ -117,8 +221,6 @@
                 requestAnimationFrame(render);
             }
             render()
-
-
         });
 
         function getColor(type){
@@ -192,6 +294,9 @@
                     break;
                 case 'desert_oasis':
                     color = '#3cc';
+                    break;
+                case 'oak_tree':
+                    color = '#1c1';
                     break;
             }
             return color;

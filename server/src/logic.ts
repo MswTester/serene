@@ -3,6 +3,9 @@ import { ServerConfig } from "./types";
 import { readFileSync, write, writeFileSync } from "fs";
 import World, { createWorld } from "./classes/world";
 import Player from "./player";
+import { ResourceType } from "./classes/resource";
+import { CreatureType } from "./classes/creature";
+import path from "path";
 
 export default class ServerLogic {
     name: string = 'Serene Server';
@@ -63,28 +66,26 @@ export default class ServerLogic {
                     socket.disconnect();
                     return;
                 }
-                socket.emit('init', {
-                    resources: this.world.getWorldObjects().resources,
-                    creatures: this.world.getWorldObjects().creatures,
-                    projectiles: this.world.getWorldObjects().projectiles,
-                    vehicles: this.world.getWorldObjects().vehicles,
-                    structures: this.world.getWorldObjects().structures,
-                    regions: this.world.getWorldObjects().regions,
-                });
+                socket.emit('init', this.world.getWorldSaveFormat());
             });
 
             // admin
             socket.on('admin', () => {
                 console.log('admin connected');
-                socket.emit('admin', {
-                    resources: this.world.getWorldObjects().resources,
-                    creatures: this.world.getWorldObjects().creatures,
-                    projectiles: this.world.getWorldObjects().projectiles,
-                    vehicles: this.world.getWorldObjects().vehicles,
-                    structures: this.world.getWorldObjects().structures,
-                    regions: this.world.getWorldObjects().regions,
+                socket.emit('admin', this.world.getWorldSaveFormat());
+
+                socket.on('command', (command:string) => {
+                    socket.emit('command-response', this.command(command))
+                })
+
+                socket.on('chat', (message:string) => {
+                    this.chat.push(message);
+                    socket.emit('chat', message);
+                    socket.broadcast.emit('chat', message);
                 });
             })
+
+            // disconnection
             socket.on('disconnect', () => {
                 console.log('user disconnected');
                 this.players.splice(this.players.findIndex((player) => player.socketId === socket.id), 1);
@@ -99,23 +100,55 @@ export default class ServerLogic {
             setTimeout(loop, 1000 / 60);
         };
         loop();
+
+        this.world.on('spawn', (resources:[], creatures:[]) => {
+            console.log('spawning...');
+            this.socket.emit('spawn', [resources, creatures]);
+        })
     }
 
-    saveWorld() {
+    command(command:string):string {
+        let args = command.split(' ');
+        let main = args[0];
+        switch(main) {
+            case '/kick':
+                let target = args[1];
+                let player = this.players.find((player) => player.uuid === target);
+                if(player) {
+                    this.socket.to(player.socketId).emit('kick', 'You have been kicked from the server!');
+                    this.socket.to(player.socketId).disconnectSockets();
+                    return 'Player kicked!';
+                } else {
+                    return 'Player not found!';
+                }
+            case '/ban':
+                let target2 = args[1];
+                let player2 = this.players.find((player) => player.uuid === target2);
+                if(player2) {
+                    this.socket.to(player.socketId).emit('kick', 'You have been banned from the server!');
+                    this.socket.to(player.socketId).disconnectSockets();
+                    this.banPlayer(player2.uuid);
+                    this.banIP(player2.address);
+                    return 'Player banned!';
+                } else {
+                    return 'Player not found!';
+                }
+            case '/save':
+                this.saveWorld(args[1]);
+                return 'World saved!';
+            default:
+                return 'Unknown command';
+        }
+    }
+
+    saveWorld(route?:string) {
         console.log('saving world...');
         let world = {
-            resources: this.world.getWorldObjects().resources,
-            creatures: this.world.getWorldObjects().creatures,
-            projectiles: this.world.getWorldObjects().projectiles,
-            vehicles: this.world.getWorldObjects().vehicles,
-            structures: this.world.getWorldObjects().structures,
-            regions: this.world.getWorldObjects().regions,
             bannedID: this.bannedID,
             bannedIP: this.bannedIP,
-            time: this.world.time,
-            weather: this.world.weather,
+            ...this.world.getWorldSaveFormat(),
         };
-        writeFileSync('./world.json', JSON.stringify(world));
+        writeFileSync(`./worlds/${route || 'world.json'}`, JSON.stringify(world), 'utf8');
         console.log('world saved!');
     }
 

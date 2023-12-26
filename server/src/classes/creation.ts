@@ -25,6 +25,28 @@ import Hell_Lava from './regions/hell_lava';
 import Creature, { CreatureType } from './creature';
 import Resource, { ResourceType } from './resource';
 import Oak_Tree from './resources/oak_tree';
+import { Direction } from './types';
+import Item, { ItemType } from './item';
+import Wood from './items/materials/wood';
+import Gold from './items/materials/gold';
+import Iron from './items/materials/iron';
+import Stone from './items/materials/stone';
+import Cotton from './items/materials/cotton';
+import Thread from './items/materials/thread';
+import Fabric from './items/materials/fabric';
+import Leather from './items/materials/leather';
+import Fur from './items/materials/fur';
+import Fiber from './items/materials/fiber';
+import Thatch from './items/materials/thatch';
+import Flint from './items/materials/flint';
+import Iron_Ingot from './items/materials/iron_metal';
+import Aluminum from './items/materials/aluminum';
+import Copper from './items/materials/copper';
+import Platinum from './items/materials/platinum';
+import Mithril from './items/materials/mithril';
+import Adamantium from './items/materials/adamantium';
+import Meteorite from './items/materials/meteorite';
+import Titanium from './items/materials/titanium';
 
 /** RegionType에 따라 Region을 생성합니다. */
 export const createRegion = (type:RegionType, polygon:[number, number][]):Region => {
@@ -79,7 +101,10 @@ export const createRegion = (type:RegionType, polygon:[number, number][]):Region
 }
 
 /** CreatureType에 따라 Creature 생성 */
-export const createCreature = (type:CreatureType, x:number, y:number):Creature => {
+export const createCreature = (type:CreatureType, x:number, y:number,
+    uuid?:string, dx?:number, dy?:number, direction?:Direction,
+    level?:number, exp?:number, state?:string, health?:number, food?:number,
+    isTamed?:boolean, inventory?:any[], ownerId?:string, ownerGuildId?:string):Creature => {
     switch(type){
         // case CreatureType:
         default:
@@ -88,9 +113,64 @@ export const createCreature = (type:CreatureType, x:number, y:number):Creature =
 }
 
 /** ResourceType에 따라 Resource 생성 */
-export const createResource = (type:ResourceType, x:number, y:number):Resource => {
+export const createResource = (type:ResourceType, x:number, y:number,
+    uuid?:string, health?:number):Resource => {
     switch(type){
         case ResourceType.Oak_Tree:
-            return new Oak_Tree(x, y);
+            return new Oak_Tree(x, y, uuid, health);
+    }
+}
+
+/** ItemType에 따라 Item 생성 */
+export const createItem = (type:ItemType, amount:number):Item => {
+    switch(type){
+        case ItemType.Cotton:
+            return new Cotton(amount);
+        case ItemType.Thread:
+            return new Thread(amount);
+        case ItemType.Fabric:
+            return new Fabric(amount);
+        case ItemType.Leather:
+            return new Leather(amount);
+        case ItemType.Fur:
+            return new Fur(amount);
+        case ItemType.Fiber:
+            return new Fiber(amount);
+        case ItemType.Wood:
+            return new Wood(amount);
+        case ItemType.Thatch:
+            return new Thatch(amount);
+        case ItemType.Stone:
+            return new Stone(amount);
+        case ItemType.Flint:
+            return new Flint(amount)
+        case ItemType.Iron:
+            return new Iron(amount);
+        case ItemType.Iron_Ingot:
+            return new Iron_Ingot(amount);
+        case ItemType.Aluminum:
+            return new Aluminum(amount);
+        case ItemType.Copper:
+            return new Copper(amount);
+        case ItemType.Gold:
+            return new Gold(amount);
+        case ItemType.Platinum:
+            return new Platinum(amount);
+        case ItemType.Mithril:
+            return new Mithril(amount);
+        case ItemType.Adamantium:
+            return new Adamantium(amount);
+        case ItemType.Titanium:
+            return new Titanium(amount);
+        case ItemType.Topaz:
+        //     return new Topaz(amount);
+        // case ItemType.Ruby:
+        //     return new Ruby(amount);
+        // case ItemType.Emerald:
+        //     return new Emerald(amount);
+        // case ItemType.Diamond:
+        //     return new Diamond(amount);
+        case ItemType.Meteorite:
+            return new Meteorite(amount);
     }
 }

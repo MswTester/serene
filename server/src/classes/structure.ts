@@ -57,6 +57,18 @@ export default class Structure{
     emit(event:string, ...args:any[]){
         this.events.emit(event, ...args);
     }
+
+    getSaveFormat(){
+        return {
+            type: this.type,
+            uuid: this.uuid,
+            x: this.x,
+            y: this.y,
+            health: this.health,
+            ownerId: this.ownerId,
+            ownerGuildId: this.ownerGuildId
+        }
+    }
 }
 
 export enum StructureType{

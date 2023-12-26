@@ -54,6 +54,20 @@ export default class Projectile{
     emit(event:string, ...args:any[]){
         this.events.emit(event, ...args);
     }
+
+    getSaveFormat(){
+        return {
+            type: this.type,
+            uuid: this.uuid,
+            x: this.x,
+            y: this.y,
+            dx: this.dx,
+            dy: this.dy,
+            rotation: this.rotation,
+            ownerId: this.ownerId,
+            damageMultiplier: this.damageMultiplier,
+        }
+    }
 }
 
 export enum ProjectileType{

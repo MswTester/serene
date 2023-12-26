@@ -1,11 +1,34 @@
 import { ItemType } from "../item";
-import Wood from "../items/materials/wood";
 import Resource, { ResourceType } from "../resource";
+import { ItemDrop } from "../types";
 
 export default class Oak_Tree extends Resource {
-    constructor(x:number, y:number) {
-        super(ResourceType.Oak_Tree, 100, 0, [
-            { item: ItemType.Wood, chance: 1, min: 1, max: 3 }
-        ], [], 'oak_tree.png', 1.2, 1.5, true, x, y, 1, 1);
+    static defaultType:ResourceType = ResourceType.Oak_Tree;
+    static defaultMaxHealth:number = 100;
+    static defaultHardness:number = 0;
+    static defaultDrops:ItemDrop[] = [
+        { item: ItemType.Wood, chance: 1, min: 1, max: 3 }
+    ]
+    static defaultRequiredTool:ItemType[] = [];
+    static defaultSrc:string = 'oak_tree.png';
+    static defaultOffsetWidth:number = 1.2;
+    static defaultOffsetHeight:number = 2;
+    static defaultIsCollidable:boolean = true;
+    static defaultWidth:number = 1;
+    static defaultHeight:number = 1;
+
+    constructor(x:number, y:number, uuid?:string, health?:number) {
+        super(
+            Oak_Tree.defaultType,
+            Oak_Tree.defaultMaxHealth,
+            Oak_Tree.defaultHardness,
+            Oak_Tree.defaultDrops,
+            Oak_Tree.defaultRequiredTool,
+            Oak_Tree.defaultSrc,
+            Oak_Tree.defaultOffsetWidth,
+            Oak_Tree.defaultOffsetHeight,
+            Oak_Tree.defaultIsCollidable,
+            x, y, Oak_Tree.defaultWidth, Oak_Tree.defaultHeight, uuid, health
+        );
     }
 }

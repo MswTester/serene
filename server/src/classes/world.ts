@@ -6,14 +6,14 @@ import Projectile from "./projectile";
 import Vehicle from "./vehicle";
 import Structure from "./structure";
 import Region, { RegionType } from "./region";
-import { generateSeed, makeSite, randomFloat, randomInt, rotateHex, seededRandomInt } from "./utils";
-import { createRegion } from './creation';
+import { generateSeed, makeArcSites, randomFloat, randomInt, seededRandomInt } from "./utils";
+import { createRegion, createResource } from './creation';
 import { Point, Polygon, SpawnMap } from './types';
 
 export default class World{
 
     // world constants
-    spawnTick:number = 36000; // 10 minutes
+    spawnTick:number = 360; // 10 minutes
     mapWidth:number = 10000;
     mapHeight:number = 10000;
 
@@ -32,13 +32,13 @@ export default class World{
     // events
     events: EventEmitter
 
-    constructor(resourceData:Resource[], creatureData:Creature[], projectileData:Projectile[], vehicleData:Vehicle[], structureData:Structure[], regionData:Region[], time:number, weather:number){
-        this.resources = resourceData;
+    constructor(resourceData:any[], creatureData:any[], projectileData:any[], vehicleData:any[], structureData:any[], regionData:any[], time:number, weather:number){
+        this.resources = resourceData.map(v => createResource(v.type, v.x, v.y, v.uuid, v.health));
         this.creatures = creatureData;
         this.projectiles = projectileData;
         this.vehicles = vehicleData;
         this.structures = structureData;
-        this.regions = regionData;
+        this.regions = regionData.map(v => createRegion(v.type, v.polygon));
         this.time = time;
         this.weather = weather;
 
@@ -57,27 +57,40 @@ export default class World{
     }
 
     spawn(){
+        let spawnCreatures:Creature[] = [];
+        let spawnResources:Resource[] = [];
         this.regions.forEach((region:Region) => {
+            let size:number = Math.sqrt(region.getSize());
             region.spawns.forEach((spawn:SpawnMap) => {
                 if(Math.random() < spawn.chance){
-                    let size = region.getSize();
-                    let count = randomInt(spawn.min * size, spawn.max * size);
-                    let spawnLimit = spawn.limit * size
+                    let count = randomInt(Math.round(spawn.min * size), Math.round(spawn.max * size));
+                    let spawnLimit = Math.round(spawn.limit * size)
+                    let isCreature = Object.values(CreatureType).includes(spawn.target as CreatureType);
+                    let curCount = (
+                        isCreature ?
+                        region.countSourceInRegion(this.creatures, spawn.target):
+                        region.countSourceInRegion(this.resources, spawn.target)
+                    )
                     if(spawnLimit > 0){
-                        count = Math.min(count, spawnLimit - region.countSourceInRegion(this.creatures, spawn.target as CreatureType));
+                        count = Math.min(count, spawnLimit - curCount)
                     }
                     if(count <= 0) return;
                     for(let i = 0; i < count; i++){
                         let [x, y] = region.getRandomPoint();
-                        if(Object.values(CreatureType).includes(spawn.target as CreatureType)){
+                        if(isCreature){
+                            // const creature:Creature = createCreature(spawn.target as CreatureType, x, y)
                             // this.addCreature();
-                        } else if(Object.values(ResourceType).includes(spawn.target as ResourceType)){
-                            // this.addResource();
+                            // spawnCreatures.push(creature);
+                        } else {
+                            const resource:Resource = createResource(spawn.target as ResourceType, x, y)
+                            this.addResource(resource);
+                            spawnResources.push(resource);
                         }
                     }
                 }
             });
         });
+        this.emit('spawn', spawnResources.map(resource => resource.getSaveFormat()), spawnCreatures.map(creature => creature.getSaveFormat()));
     }
 
     addCreature(creature:Creature){
@@ -85,10 +98,12 @@ export default class World{
             this.removeCreature(creature);
         })
         this.creatures.push(creature);
+        this.emit('creatureSpawn', creature)
     }
 
     removeCreature(creature:Creature){
         this.creatures.splice(this.creatures.indexOf(creature), 1);
+        this.emit('creatureDeath', creature)
     }
 
     addResource(resource:Resource){
@@ -96,10 +111,12 @@ export default class World{
             this.removeResource(resource);
         })
         this.resources.push(resource);
+        this.emit('resourceSpawn', resource)
     }
 
     removeResource(resource:Resource){
         this.resources.splice(this.resources.indexOf(resource), 1);
+        this.emit('resourceDestroy', resource)
     }
 
     on(event:string, callback:(...args: any[]) => void){
@@ -119,12 +136,25 @@ export default class World{
 
     getWorldObjects(){
         return {
-            resources: this.resources,
-            creatures: this.creatures,
-            projectiles: this.projectiles,
-            vehicles: this.vehicles,
-            structures: this.structures,
-            regions: this.regions,
+            resources: this.resources.map((resource) => resource.getSaveFormat()),
+            creatures: this.creatures.map((creature) => creature.getSaveFormat()),
+            projectiles: this.projectiles.map((projectile) => projectile.getSaveFormat()),
+            vehicles: this.vehicles.map((vehicle) => vehicle.getSaveFormat()),
+            structures: this.structures.map((structure) => structure.getSaveFormat()),
+            regions: this.regions.map((region) => region.getSaveFormat()),
+        }
+    }
+
+    getWorldSaveFormat(){
+        return {
+            time: this.time,
+            weather: this.weather,
+            resources: this.resources.map((resource) => resource.getSaveFormat()),
+            creatures: this.creatures.map((creature) => creature.getSaveFormat()),
+            projectiles: this.projectiles.map((projectile) => projectile.getSaveFormat()),
+            vehicles: this.vehicles.map((vehicle) => vehicle.getSaveFormat()),
+            structures: this.structures.map((structure) => structure.getSaveFormat()),
+            regions: this.regions.map((region) => region.getSaveFormat()),
         }
     }
 }
@@ -143,118 +173,123 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     let sites:[number, number, RegionType][] = [];
 
     const config = {
-        centerForestRange: 100,
+        centerForestCount: 45,
+        centerForestRange: 0.1,
         spaceCount: 60,
         spaceRange: 0.06,
-        spaceRadius: 10,
+        spaceRadius: 13,
         oceanCount: 20,
         oceanRadius: 160,
         oceanRange: [0.76, 0.8],
         oceanDeepCount:20,
-        oceanDeepRadius: 140,
+        oceanDeepRadius: 140.7536,
         oceanDeepRange: [0.86, 0.9],
-        hellCount: 25,
-        hellRadius: 140,
-        hellRange: [0.8, 0.9],
-        hellLavaCount: 20,
-        hellLavaRadius: 140,
-        hellLavaRange: [0.8, 0.9],
-        outerBiomeCount: 10,
+        hellCount: 200,
+        hellRadius: 150,
+        hellRange: [0.72, 0.9],
+        hellLavaCount: 200,
+        hellLavaRadius: 150,
+        hellLavaRange: [0.75, 0.9],
+        outerBiomeCount: 11,
         outerBiomeRadius: 6,
-        outerBiomeRange: [0.44, 0.6],
+        outerBiomeRange: [0.45, 0.6],
         innerBiomeCount: 7,
         innerBiomeRadius: 6,
-        innerBiomeRange: [0.2, 0.3],
+        innerBiomeRange: [0.22, 0.3],
     }
     const mc:number = Math.floor(Math.min(width, height) / 2);
     const center:[number, number] = [width / 2, height / 2];
     let curSeed = seed;
 
-    makeSite(curSeed, 0, config.centerForestRange, 0, 360, 1, false, 1, ...center).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
-    curSeed = rotateHex(curSeed, 1);
+    makeArcSites(curSeed, 0, config.centerForestRange*mc, 0, 360, config.centerForestCount, false, 2, ...center).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
+    curSeed += config.centerForestCount.toString();
     const sr = (config.spaceRadius/2)
     for(let i = 0; i < config.spaceCount; i++){
         const angle = 360/config.spaceCount * i;
-        makeSite(rotateHex(curSeed, 1+config.spaceCount*i), (1-config.spaceRange)*mc, 1*mc, angle-sr, angle+sr, 1, false, 1, ...center).forEach((pos) => {sites.push([...pos, RegionType.Space])})
-        curSeed = rotateHex(curSeed, 1);
+        makeArcSites(curSeed, (1-config.spaceRange)*mc, 1*mc, angle-sr, angle+sr, 1, false, 1, ...center).forEach((pos) => {sites.push([...pos, RegionType.Space])})
+        curSeed += 's'
     }
 
     const endAngle = seededRandomInt(curSeed, 0, 360);
-    curSeed = rotateHex(curSeed, 1);
+    curSeed += config.spaceCount.toString();
 
     const or = (config.oceanRadius/2)
     const odr = (config.oceanDeepRadius/2)
     // ocean
-    makeSite(curSeed, config.oceanDeepRange[0]*mc, config.oceanDeepRange[1]*mc, endAngle-odr, endAngle+odr, config.oceanDeepCount, true, 2, ...center).forEach((pos) => {
+    makeArcSites(curSeed, config.oceanDeepRange[0]*mc, config.oceanDeepRange[1]*mc, endAngle-odr, endAngle+odr, config.oceanDeepCount, true, 2, ...center).forEach((pos) => {
         sites.push([...pos, RegionType.Ocean_Deep])
     });
-    curSeed = rotateHex(curSeed, config.oceanDeepCount);
-    makeSite(curSeed, config.oceanRange[0]*mc, config.oceanRange[1]*mc, endAngle-or, endAngle+or, config.oceanCount, true, 2, ...center).forEach((pos) => {
+    curSeed += config.oceanDeepCount.toString();
+    makeArcSites(curSeed, config.oceanRange[0]*mc, config.oceanRange[1]*mc, endAngle-or, endAngle+or, config.oceanCount, true, 2, ...center).forEach((pos) => {
         sites.push([...pos, RegionType.Ocean])
     });
-    curSeed = rotateHex(curSeed, config.oceanCount);
+    curSeed += config.oceanCount.toString();
 
     const hr = (config.hellRadius/2)
     const hlr = (config.hellLavaRadius/2)
     // hell
-    makeSite(curSeed, config.hellRange[0]*mc, config.hellRange[1]*mc, endAngle+180-hr, endAngle+180+hr, config.hellCount, true, 2, ...center).forEach((pos) => {
+    makeArcSites(curSeed, config.hellRange[0]*mc, config.hellRange[1]*mc, endAngle+180-hr, endAngle+180+hr, config.hellCount, true, 2, ...center).forEach((pos) => {
         sites.push([...pos, RegionType.Hell])
     })
-    curSeed = rotateHex(curSeed, config.hellCount);
-    makeSite(curSeed, config.hellLavaRange[0]*mc, config.hellLavaRange[1]*mc, endAngle+180-hlr, endAngle+180+hlr, config.hellLavaCount, true, 2, ...center).forEach((pos) => {
+    curSeed += config.hellCount.toString();
+    makeArcSites(curSeed, config.hellLavaRange[0]*mc, config.hellLavaRange[1]*mc, endAngle+180-hlr, endAngle+180+hlr, config.hellLavaCount, true, 2, ...center).forEach((pos) => {
         sites.push([...pos, RegionType.Hell_Lava])
     })
-    curSeed = rotateHex(curSeed, config.hellLavaCount);
-    
+    curSeed += config.hellLavaCount.toString();
+
     // outer 바이옴 생성
-    makeSite(curSeed, 2200, 3000, 0, 360, 10, true, 6, ...center).forEach((pos, i) => {
+    makeArcSites(curSeed, config.outerBiomeRange[0]*mc, config.outerBiomeRange[1]*mc, 0, 360, 10, true, 6, ...center).forEach((pos, i) => {
         if(i % 3 == 0){
-            makeSite(curSeed, 0.1*mc, 0.12*mc, 0, 360, 9, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle])})
-            curSeed = rotateHex(curSeed, 9);
-            makeSite(curSeed, 0, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_Deep])})
-            curSeed = rotateHex(curSeed, 3);
-            makeSite(curSeed, 0.06*mc, 0.08*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_River])})
-            curSeed = rotateHex(curSeed, 3);
+            makeArcSites(curSeed, 0.1*mc, 0.12*mc, 0, 360, 11, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle])})
+            curSeed += 'oB0'
+            makeArcSites(curSeed, 0, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_Deep])})
+            curSeed += 'oB1'
+            makeArcSites(curSeed, 0.025*mc, 0.045*mc, 0, 360, 4, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle])})
+            curSeed += 'oB2'
+            makeArcSites(curSeed, 0.08*mc, 0.1*mc, 0, 360, 7, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_Deep])})
+            curSeed += 'oB3'
+            makeArcSites(curSeed, 0.06*mc, 0.08*mc, 0, 360, 5, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_River])})
+            curSeed += 'oB4'
         } else if(i % 3 == 1){
-            makeSite(curSeed, 0.11*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp])})
-            curSeed = rotateHex(curSeed, 10);
-            makeSite(curSeed, 0.02*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Water])})
-            curSeed = rotateHex(curSeed, 3);
-            makeSite(curSeed, 0.08*mc, 0.1*mc, 0, 360, 8, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Mud])})
-            curSeed = rotateHex(curSeed, 8);
+            makeArcSites(curSeed, 0.11*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp])})
+            curSeed += 'oB5'
+            makeArcSites(curSeed, 0.02*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Water])})
+            curSeed += 'oB6'
+            makeArcSites(curSeed, 0.08*mc, 0.1*mc, 0, 360, 8, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Mud])})
+            curSeed += 'oB7'
         } else if(i % 3 == 2){
-            makeSite(curSeed, 0.1*mc, 0.11*mc, 0, 360, 5, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
-            curSeed = rotateHex(curSeed, 5);
-            makeSite(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Deep])})
-            curSeed = rotateHex(curSeed, 3);
-            makeSite(curSeed, 0.02*mc, 0.06*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
-            curSeed = rotateHex(curSeed, 3);
+            makeArcSites(curSeed, 0.1*mc, 0.11*mc, 0, 360, 5, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
+            curSeed += 'oB8'
+            makeArcSites(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Deep])})
+            curSeed += 'oB9'
+            makeArcSites(curSeed, 0.02*mc, 0.06*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
+            curSeed += 'oB10'
         }
     })
 
     // inner 바이옴 생성
-    makeSite(curSeed, 1000, 1500, 0, 360, 7, true, 6, ...center).forEach((pos, i) => {
+    makeArcSites(curSeed, config.innerBiomeRange[0]*mc, config.innerBiomeRange[1]*mc, 0, 360, 7, true, 6, ...center).forEach((pos, i) => {
         if(i % 4 == 0){
-            makeSite(curSeed, 0.07*mc, 0.09*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave])})
-            curSeed = rotateHex(curSeed, 10);
-            makeSite(curSeed, 0*mc, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Deep])})
-            curSeed = rotateHex(curSeed, 3);
-            makeSite(curSeed, 0.04*mc, 0.06*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Dark])})
-            curSeed = rotateHex(curSeed, 3);
+            makeArcSites(curSeed, 0.07*mc, 0.09*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave])})
+            curSeed += 'iB0'
+            makeArcSites(curSeed, 0*mc, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Deep])})
+            curSeed += 'iB1'
+            makeArcSites(curSeed, 0.04*mc, 0.06*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Dark])})
+            curSeed += 'iB2'
         } else if(i % 4 == 1){
-            makeSite(curSeed, 0.06*mc, 0.08*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow])})
-            curSeed = rotateHex(curSeed, 6);
-            makeSite(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Ice])})
-            curSeed = rotateHex(curSeed, 3);
-            makeSite(curSeed, 0.02*mc, 0.04*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Lake])})
-            curSeed = rotateHex(curSeed, 3);
+            makeArcSites(curSeed, 0.06*mc, 0.08*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow])})
+            curSeed += 'iB3'
+            makeArcSites(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Ice])})
+            curSeed += 'iB4'
+            makeArcSites(curSeed, 0.02*mc, 0.04*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Lake])})
+            curSeed += 'iB5'
         } else if(i % 4 == 2 || i % 4 == 3){
-            makeSite(curSeed, 0.06*mc, 0.1*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert])})
-            curSeed = rotateHex(curSeed, 3);
-            makeSite(curSeed, 0.04*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Sandstone])})
-            curSeed = rotateHex(curSeed, 3);
-            makeSite(curSeed, 0, 0.024*mc, 0, 360, 2, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Oasis])})
-            curSeed = rotateHex(curSeed, 2);
+            makeArcSites(curSeed, 0.06*mc, 0.1*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert])})
+            curSeed += 'iB6'
+            makeArcSites(curSeed, 0.04*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Sandstone])})
+            curSeed += 'iB7'
+            makeArcSites(curSeed, 0, 0.024*mc, 0, 360, 2, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Oasis])})
+            curSeed += 'iB8'
         }
     })
 

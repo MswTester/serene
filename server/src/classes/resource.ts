@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import Item from "./item";
+import Item, { ItemType } from "./item";
 import { generateUUID } from "./utils";
 import { ItemDrop } from "./types";
 
@@ -10,7 +10,7 @@ export default class Resource{
     readonly hardness:number;
 
     readonly drops:ItemDrop[];
-    readonly requiredTool:Item[];
+    readonly requiredTool:ItemType[];
 
     readonly src:string;
     readonly offsetWidth:number;
@@ -27,8 +27,8 @@ export default class Resource{
 
     health:number;
 
-    constructor(type:ResourceType, maxHealth:number, hardness:number, drops:ItemDrop[], requiredTool:Item[], src:string, offsetWidth:number, offsetHeight:number, isCollidable:boolean,
-        x:number, y:number, width:number, height:number){
+    constructor(type:ResourceType, maxHealth:number, hardness:number, drops:ItemDrop[], requiredTool:ItemType[], src:string, offsetWidth:number, offsetHeight:number, isCollidable:boolean,
+        x:number, y:number, width:number, height:number, uuid?:string, health?:number){
         this.type = type;
         this.maxHealth = maxHealth;
         this.hardness = hardness;
@@ -39,13 +39,13 @@ export default class Resource{
         this.offsetHeight = offsetHeight;
         this.isCollidable = isCollidable;
 
-        this.uuid = generateUUID();
+        this.uuid = uuid || generateUUID();
         this.events = new EventEmitter();
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.health = this.maxHealth;
+        this.health = health != undefined ? health : this.maxHealth;
     }
 
     on(event:string, listener:(...args: any[]) => void){
@@ -54,6 +54,16 @@ export default class Resource{
 
     emit(event:string, ...args:any[]){
         this.events.emit(event, ...args);
+    }
+
+    getSaveFormat(){
+        return {
+            type: this.type,
+            uuid: this.uuid,
+            x: this.x,
+            y: this.y,
+            health: this.health,
+        }
     }
 }
 

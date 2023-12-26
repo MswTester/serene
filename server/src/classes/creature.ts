@@ -47,7 +47,8 @@ export default class Creature {
 
     constructor(type: CreatureType, name: string, src: string, offsetWidth: number, offsetHeight: number,
         stateTypes:string[], baseHealth: number, baseDamage: number[], baseDefense: number, baseFood: number, baseSpeed: number[], drops: ItemDrop[],
-        x: number, y: number, dx: number, dy: number, direction: Direction, width: number, height: number, level:number, exp:number, isTamed: boolean, ownerId: string, ownerGuildId: string) {
+        x: number, y: number, dx: number, dy: number, direction: Direction, width: number, height: number, level:number, exp:number, isTamed: boolean, ownerId: string, ownerGuildId: string,
+        uuid?:string, state?:string, health?:number, food?:number, inventory?:Inventory) {
         this.type = type;
         this.name = name;
         this.src = src;
@@ -61,13 +62,13 @@ export default class Creature {
         this.baseSpeed = baseSpeed;
         this.drops = drops;
 
-        this.uuid = generateUUID();
+        this.uuid = uuid || generateUUID();
         this.events = new EventEmitter();
         this.level = level;
         this.exp = exp;
-        this.state = this.stateTypes[0];
-        this.health = this.baseHealth * (1+this.level/100);
-        this.food = this.baseFood * (1+this.level/100);
+        this.state = state || this.stateTypes[0];
+        this.health = health != undefined ? health : this.baseHealth * (1+this.level/100);
+        this.food = food != undefined ? food : this.baseFood * (1+this.level/100);
         this.x = x;
         this.y = y;
         this.dx = dx;
@@ -75,7 +76,7 @@ export default class Creature {
         this.direction = direction;
         this.width = width;
         this.height = height;
-        this.inventory = new Inventory(10);
+        this.inventory = inventory || new Inventory(10);
         this.isTamed = isTamed;
         this.ownerId = ownerId;
         this.ownerGuildId = ownerGuildId;
@@ -98,6 +99,27 @@ export default class Creature {
             speed: this.baseSpeed.map(v => v * (1+this.level/100)),
         }
     }
+
+    getSaveFormat() {
+        return {
+            type: this.type,
+            uuid: this.uuid,
+            x: this.x,
+            y: this.y,
+            dx: this.dx,
+            dy: this.dy,
+            direction: this.direction,
+            level: this.level,
+            exp: this.exp,
+            state: this.state,
+            health: this.health,
+            food: this.food,
+            isTamed: this.isTamed,
+            inventory: this.inventory.getSaveFormat(),
+            ownerId: this.ownerId,
+            ownerGuildId: this.ownerGuildId,
+        }
+    }
 }
 
 export enum CreatureType {
@@ -112,10 +134,10 @@ export enum CreatureType {
     Forst_Hare = 'forst_hare', // (snow) Hare, 눈토끼, 테이밍 가능
     Moss_Frog = 'moss_frog', // (swamp) Frog, 이끼로 덮인 개구리, 테이밍 가능
     Bubble_Ray = 'bubble_ray', // (ocean) Manta ray, 거품을 뿜는 가오리, 테이밍 가능
-    Star_Jellyfish = 'star_jellyfish', // (space) Jellyfish, 별처럼 빛나는 해파리, 테이밍 가능
+    Star_Jelly = 'star_jelly', // (space) Jellyfish, 별처럼 빛나는 해파리, 테이밍 가능
 
     // Neutral
-    Moon_Blossom = 'moon_blossom', // (forest) Moon blossom, 밤일때 반짝이는 기린형 생명체, 테이밍 가능
+    Moon_Blossom = 'moon_blossom', // (forest) Moon blossom, 밤일때 반짝이는 기린느낌 생명체, 테이밍 가능
     Iron_Hawk = 'iron_hawk', // (forest_deep) Hawk, 철같은 날개를 가진 매, 테이밍 가능
     Lurker = 'lurker', // (cave) Lurker, 동굴에 사는 돌같이 생긴 거미, 테이밍 가능
     Glow_Cent = 'glow_cent', // (cave_deep) Centipede, 지네, 테이밍 가능
@@ -137,11 +159,11 @@ export enum CreatureType {
     Deathworm = 'deathworm', // (desert) Deathworm, 사막에 사는 거대한 벌레, 테이밍 가능
     Frost_Wolf = 'frost_wolf', // (snow) Wolf, 얼음 같은 털을 가진 늑대, 테이밍 가능
     Anaconda = 'anaconda', // (jungle) Anaconda, 거대한 뱀, 테이밍 가능
-    Riverback_Croc = 'riverback_croc', // (jungle) Crocodile, 악어, 테이밍 가능
+    Riverback_Croc = 'riverback_croc', // (jungle_water) Crocodile, 악어, 테이밍 가능
     Kraken = 'kraken', // (ocean_deep) Kraken, 거대한 문어, 테이밍 가능
     Flame_Hound = 'flame_hound', // (hell) Hellhound, 불을 뿜는 개, 테이밍 가능
     Wyvern = 'wyvern', // (hell_lava) Wyvern, 날개를 가진 드래곤, 테이밍 가능
-    Void_Serpent = 'void_serpent', // (space) Void serpent, 우주에 사는 거대한 뱀, 테이밍 가능
+    Void_Serpent = 'void_serpent', // (space) Void serpent, 우주에 사는 거대한 뱀, 테이밍 불가능
 
     // Boss
     Ent = 'ent', // (forest_deep) Boss, 사람형태를 가진 거대한 나무 괴물
@@ -152,7 +174,10 @@ export enum CreatureType {
     Jungle_Titan = 'jungle_titan', // (jungle_deep) Boss, 나무를 조종하는 거대한 생명체
     Leviathan = 'leviathan', // (ocean_deep) Boss, 용과 고래를 합친 형태의 거대한 괴물고기
     Pheonix = 'pheonix', // (hell) Boss, 불을 뿜는 새
-    Guardian = 'guardian', // (space) Boss, 우주를 지키는 거대한 생명체
+    Void_Dragon = 'void_dragon', // (space) Boss, 우주를 지배하는 거대한 용
+    
+    // Fianl Boss
+    Guardian = 'guardian', // (space) Final Boss, 우주의 수호자
 
     // Others
 }

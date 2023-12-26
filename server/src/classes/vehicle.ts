@@ -66,6 +66,22 @@ export default class Vehicle{
     emit(event:string, ...args:any[]){
         this.events.emit(event, ...args);
     }
+
+    getSaveFormat(){
+        return {
+            type: this.type,
+            uuid: this.uuid,
+            x: this.x,
+            y: this.y,
+            dx: this.dx,
+            dy: this.dy,
+            direction: this.direction,
+            health: this.health,
+            fuel: this.fuel,
+            ownerId: this.ownerId,
+            ownerGuildId: this.ownerGuildId,
+        }
+    }
 }
 
 export enum VehicleType{

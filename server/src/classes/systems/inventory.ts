@@ -3,9 +3,12 @@ import Item from "../item";
 export default class Inventory{
     private Items:(Item|null)[] = [];
 
-    constructor(maxSlots:number){
-        for(let i = 0; i < maxSlots; i++){
-            this.Items.push(null);
+    constructor(maxSlots?:number, items?:(Item|null)[]){
+        this.Items = items || this.Items;
+        if(maxSlots != undefined){
+            for(let i = 0; i < maxSlots; i++){
+                this.Items.push(null);
+            }
         }
     }
 
@@ -48,6 +51,16 @@ export default class Inventory{
         } else if(length < this.Items.length){
             this.Items.splice(length, this.Items.length - length);
         }
+    }
+
+    getSaveFormat(){
+        return this.Items.map((item) => {
+            if(item == null){
+                return null;
+            } else {
+                return item.getSaveFormat();
+            }
+        });
     }
 }
 

@@ -41,41 +41,53 @@ export const seededRandomFloat = (seed:string, min:number, max:number) => {
     return rand.quick() * (max - min) + min;
 }
 
+/** 다각형 내부에 점이 있는지 확인 */
+export const isInsidePolygon = (point: Point, polygon: Polygon): boolean => {
+    let [x, y] = point;
+    let inside = false;
+
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        let [xi, yi] = polygon[i];
+        let [xj, yj] = polygon[j];
+
+        let intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+
+    return inside;
+}
+
 /** 다각형 내부의 랜덤한 점을 생성 */
-export const getRandomPositionInPolygon = (polygon: [number, number][]): [number, number] => {
-    // 다각형의 centroid를 구합니다.
-    const centroid = getPolygonCentroid(polygon);
-  
-    // 다각형의 각 점과 centroid 사이의 최대 거리를 구합니다.
-    let maxDistance = Math.max(...polygon.map(p => Math.hypot(p[0] - centroid[0], p[1] - centroid[1])));
-    let avgDistance = maxDistance / polygon.length;
-  
-    // 랜덤한 방향과 거리를 선택합니다.
-    let angle = Math.random() * Math.PI * 2;
-    let distance = Math.random() * avgDistance;
-  
-    // 새로운 점을 생성합니다.
-    let x = centroid[0] + distance * Math.cos(angle);
-    let y = centroid[1] + distance * Math.sin(angle);
-  
-    return [x, y];
+export const getRandomPositionInPolygon = (polygon: Polygon): Point => {
+    let minX = Math.min(...polygon.map(p => p[0]));
+    let maxX = Math.max(...polygon.map(p => p[0]));
+    let minY = Math.min(...polygon.map(p => p[1]));
+    let maxY = Math.max(...polygon.map(p => p[1]));
+
+    let point: Point;
+    do {
+        let x = Math.random() * (maxX - minX) + minX;
+        let y = Math.random() * (maxY - minY) + minY;
+        point = [x, y];
+    } while (!isInsidePolygon(point, polygon));
+
+    return point;
 }
 
 /** 다각형의 넓이를 구합니다. */
-export const getPolygonArea = (points: [number, number][]): number => {
+export const getPolygonArea = (polygon: Polygon): number => {
     let area = 0;
 
-    for (let i = 0; i < points.length; i++) {
-        const j = (i + 1) % points.length;
-        area += points[i][0] * points[j][1];
-        area -= points[j][0] * points[i][1];
+    for (let i = 0; i < polygon.length; i++) {
+        const j = (i + 1) % polygon.length;
+        area += polygon[i][0] * polygon[j][1] - polygon[j][0] * polygon[i][1];
     }
 
     return Math.abs(area / 2);
 }
 
 /** 다각형의 centroid를 구합니다. */
-export const getPolygonCentroid = (polygon: [number, number][]): [number, number] => {
+export const getPolygonCentroid = (polygon: Polygon): Point => {
     let xSum = 0, ySum = 0;
   
     for (const [x, y] of polygon) {
@@ -93,20 +105,33 @@ export const getPosByRot = (x:number, y:number, distance:number, angle:number):[
 }
 
 /** 시드 기반 사이트 생성 */
-export const makeSite = (seed:string, minDistance:number, maxDistance:number, minAngle:number, maxAngle:number, repeat:number, golgoru:boolean, grange:number, cx:number, cy:number):[number, number][] =>{
+export const makeArcSites = (seed:string, minDistance:number, maxDistance:number, minAngle:number, maxAngle:number, repeat:number, golgoru:boolean, grange:number, cx:number, cy:number):[number, number][] =>{
     let poses:[number, number][] = []
     for(let i = 0; i < repeat; i++){
-        let angle = seededRandomInt(rotateHex(seed, i), minAngle, maxAngle);
+        let angle = seededRandomInt(seed + `${i}`, minAngle, maxAngle);
         if(golgoru){
             let gap = (maxAngle - minAngle) / repeat
-            angle = minAngle + gap * i + seededRandomInt(rotateHex(seed, i), -gap / grange, gap / grange);
+            angle = minAngle + gap * i + seededRandomInt(seed + `${i}`, -gap / grange, gap / grange);
         }
-        const distance = seededRandomInt(rotateHex(seed, i), minDistance, maxDistance);
+        const distance = seededRandomInt(seed + `${i}` + 'd', minDistance, maxDistance);
+        if(maxDistance == 555) console.log(angle, distance)
         const [x, y] = getPosByRot(cx, cy, distance, angle);
         poses.push([x, y]);
     }
     return shuffle(poses);
 }
+
+/** 시드 기반 사이트 생성 */
+export const makeLineSites = (seed:string, minDistance:number, maxDistance:number, startAngle:number, minRadiusAngle:number, maxRadiusAngle:number, repeat:number, cx:number, cy:number):[number, number][] =>{
+    let poses:[number, number][] = []
+
+    return poses;
+}
+
+/** 시드 기반 사이트 생성 */
+// export const makeRootSites = (seed:string) => {
+// 
+// }
 
 /** 배열을 suffle */
 export const shuffle = (array:any[]) => {
@@ -173,30 +198,4 @@ export function isIntersecting(polygon: Polygon, polygon2: Polygon): boolean {
     }
 
     return false;
-}
-
-export const rotateHex = (hexString: string, n: number): string => {
-    const hexCharacters = "0123456789ABCDEF";
-  
-    // hexString의 길이를 로테이션 횟수로 나눈 나머지만큼 로테이션 수행
-    const rotationCount = n % hexString.length;
-  
-    if (rotationCount === 0) {
-      return hexString; // 로테이션 횟수가 0이면 변화 없이 반환
-    }
-  
-    let result = "";
-  
-    for (let i = 0; i < hexString.length; i++) {
-      const char = hexString[i];
-      const charIndex = hexCharacters.indexOf(char);
-      if (charIndex === -1) {
-        result += char;
-      } else {
-        const newIndex = (charIndex + rotationCount) % 16;
-        result += hexCharacters[newIndex];
-      }
-    }
-  
-    return result;
 }
