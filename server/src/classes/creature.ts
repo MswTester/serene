@@ -47,8 +47,8 @@ export default class Creature {
 
     constructor(type: CreatureType, name: string, src: string, offsetWidth: number, offsetHeight: number,
         stateTypes:string[], baseHealth: number, baseDamage: number[], baseDefense: number, baseFood: number, baseSpeed: number[], drops: ItemDrop[],
-        x: number, y: number, dx: number, dy: number, direction: Direction, width: number, height: number, level:number, exp:number, isTamed: boolean, ownerId: string, ownerGuildId: string,
-        uuid?:string, state?:string, health?:number, food?:number, inventory?:Inventory) {
+        x: number, y: number, dx: number, dy: number, direction: Direction, width: number, height: number, level:number, exp:number,
+        uuid?:string, state?:string, health?:number, food?:number, inventory?:Inventory, isTamed?: boolean, ownerId?: string, ownerGuildId?: string) {
         this.type = type;
         this.name = name;
         this.src = src;
@@ -77,9 +77,9 @@ export default class Creature {
         this.width = width;
         this.height = height;
         this.inventory = inventory || new Inventory(10);
-        this.isTamed = isTamed;
-        this.ownerId = ownerId;
-        this.ownerGuildId = ownerGuildId;
+        this.isTamed = isTamed != undefined ? isTamed : false;
+        this.ownerId = ownerId != undefined ? ownerId : '';
+        this.ownerGuildId = ownerGuildId != undefined ? ownerGuildId : '';
     }
 
     on(event: string, listener: (...args: any[]) => void) {
@@ -120,6 +120,25 @@ export default class Creature {
             ownerGuildId: this.ownerGuildId,
         }
     }
+}
+
+export interface CreatureSaveFormat {
+    type: CreatureType;
+    uuid: string;
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+    direction: Direction;
+    level: number;
+    exp: number;
+    state: string;
+    health: number;
+    food: number;
+    isTamed: boolean;
+    inventory: any[];
+    ownerId: string;
+    ownerGuildId: string;
 }
 
 export enum CreatureType {

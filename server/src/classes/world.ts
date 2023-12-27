@@ -1,19 +1,21 @@
 import { voronoi } from 'd3-voronoi'
 import { EventEmitter } from "events";
-import Resource, { ResourceType } from "./resource";
-import Creature, { CreatureType } from "./creature";
-import Projectile from "./projectile";
-import Vehicle from "./vehicle";
-import Structure from "./structure";
-import Region, { RegionType } from "./region";
-import { generateSeed, makeArcSites, randomFloat, randomInt, seededRandomInt } from "./utils";
-import { createRegion, createResource } from './creation';
+import Resource, { ResourceSaveFormat, ResourceType } from "./resource";
+import Creature, { CreatureSaveFormat, CreatureType } from "./creature";
+import Projectile, { ProjectileSaveFormat } from "./projectile";
+import Vehicle, { VehicleSaveFormat } from "./vehicle";
+import Structure, { StructureSaveFormat } from "./structure";
+import Region, { RegionSaveFormat, RegionType } from "./region";
+import { generateSeed, getPosByRot, makeArcSites, makeLineSites, randomFloat, randomInt, seededRandomInt } from "./utils";
 import { Point, Polygon, SpawnMap } from './types';
+import { createCreature } from './creation/createCreature';
+import { createRegion } from './creation/createRegion';
+import { createResource } from './creation/createResource';
 
 export default class World{
 
     // world constants
-    spawnTick:number = 360; // 10 minutes
+    spawnTick:number = 36000; // 10 minutes
     mapWidth:number = 10000;
     mapHeight:number = 10000;
 
@@ -32,15 +34,24 @@ export default class World{
     // events
     events: EventEmitter
 
-    constructor(resourceData:any[], creatureData:any[], projectileData:any[], vehicleData:any[], structureData:any[], regionData:any[], time:number, weather:number){
+    constructor(
+        resourceData:ResourceSaveFormat[],
+        creatureData:CreatureSaveFormat[],
+        projectileData:any[],
+        vehicleData:any[],
+        structureData:any[],
+        regionData:RegionSaveFormat[],
+        time:number, weather:number,
+        spawnInterval:number = 36000){
         this.resources = resourceData.map(v => createResource(v.type, v.x, v.y, v.uuid, v.health));
-        this.creatures = creatureData;
+        this.creatures = creatureData.map(v => createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId));
         this.projectiles = projectileData;
         this.vehicles = vehicleData;
         this.structures = structureData;
         this.regions = regionData.map(v => createRegion(v.type, v.polygon));
         this.time = time;
         this.weather = weather;
+        this.spawnTick = spawnInterval;
 
         this.events = new EventEmitter();
     }
@@ -57,8 +68,8 @@ export default class World{
     }
 
     spawn(){
-        let spawnCreatures:Creature[] = [];
-        let spawnResources:Resource[] = [];
+        let spawnCreatures:any[] = [];
+        let spawnResources:any[] = [];
         this.regions.forEach((region:Region) => {
             let size:number = Math.sqrt(region.getSize());
             region.spawns.forEach((spawn:SpawnMap) => {
@@ -76,21 +87,21 @@ export default class World{
                     }
                     if(count <= 0) return;
                     for(let i = 0; i < count; i++){
-                        let [x, y] = region.getRandomPoint();
+                        let [x, y] = region.getRandomPoint().map(v => Math.round(v));
                         if(isCreature){
-                            // const creature:Creature = createCreature(spawn.target as CreatureType, x, y)
-                            // this.addCreature();
-                            // spawnCreatures.push(creature);
+                            const creature:Creature = createCreature(spawn.target as CreatureType, x, y, 1, 0)
+                            this.addCreature(creature);
+                            spawnCreatures.push(creature.getSaveFormat());
                         } else {
                             const resource:Resource = createResource(spawn.target as ResourceType, x, y)
                             this.addResource(resource);
-                            spawnResources.push(resource);
+                            spawnResources.push(resource.getSaveFormat());
                         }
                     }
                 }
             });
         });
-        this.emit('spawn', spawnResources.map(resource => resource.getSaveFormat()), spawnCreatures.map(creature => creature.getSaveFormat()));
+        this.emit('spawn', spawnResources, spawnCreatures);
     }
 
     addCreature(creature:Creature){
@@ -163,18 +174,19 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     console.log('Creating World...');
     console.log('Seed : ' + seed)
     
-    let resources:Resource[] = [];
-    let creatures:Creature[] = [];
-    let projectiles:Projectile[] = [];
-    let vehicles:Vehicle[] = [];
-    let structures:Structure[] = [];
-    let regions:Region[] = [];
+    let resources:ResourceSaveFormat[] = [];
+    let creatures:CreatureSaveFormat[] = [];
+    let projectiles:ProjectileSaveFormat[] = [];
+    let vehicles:VehicleSaveFormat[] = [];
+    let structures:StructureSaveFormat[] = [];
+    let regions:RegionSaveFormat[] = [];
 
     let sites:[number, number, RegionType][] = [];
 
     const config = {
         centerForestCount: 45,
         centerForestRange: 0.1,
+        centerLakeCount: 5,
         spaceCount: 60,
         spaceRange: 0.06,
         spaceRadius: 13,
@@ -203,6 +215,14 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
 
     makeArcSites(curSeed, 0, config.centerForestRange*mc, 0, 360, config.centerForestCount, false, 2, ...center).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
     curSeed += config.centerForestCount.toString();
+    let cla = seededRandomInt(curSeed, 0, 360)
+    let clp = getPosByRot(...center, (0.01 * config.centerLakeCount) * mc, cla + 180)
+    makeLineSites(curSeed, 0.005*mc, 0.01*mc, cla, 20, config.centerLakeCount, ...clp).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
+    curSeed += config.centerLakeCount.toString();
+    cla = seededRandomInt(curSeed, cla-100, cla+100)
+    clp = getPosByRot(...center, (0.01 * config.centerLakeCount) * mc, cla + 180)
+    makeLineSites(curSeed, 0.01*mc, 0.02*mc, cla, 20, config.centerLakeCount, ...clp).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
+    curSeed += config.centerLakeCount.toString();
     const sr = (config.spaceRadius/2)
     for(let i = 0; i < config.spaceCount; i++){
         const angle = 360/config.spaceCount * i;
@@ -295,7 +315,7 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
 
     let diagram = voronoi().extent([[0,0],[width, height]])(sites.map((site) => [site[0], site[1]]));
     diagram.polygons().forEach((polygon:Polygon, i:number) => {
-        regions.push(createRegion(sites[i][2], polygon.map((point:Point) => [Math.round(point[0]), Math.round(point[1])])));
+        regions.push({type:sites[i][2], polygon:polygon.map((point:Point) => [Math.round(point[0]), Math.round(point[1])])});
     });
 
     return new World(
@@ -306,6 +326,6 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
         structures,
         regions,
         0,
-        0,
+        0
     );
 }

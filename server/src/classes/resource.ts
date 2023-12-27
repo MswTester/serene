@@ -67,6 +67,14 @@ export default class Resource{
     }
 }
 
+export interface ResourceSaveFormat{
+    type:ResourceType;
+    uuid:string;
+    x:number;
+    y:number;
+    health:number;
+}
+
 export enum ResourceType{
     Oak_Tree = 'oak_tree',
     Cotton_Tree = 'cotton_tree',
@@ -75,4 +83,5 @@ export enum ResourceType{
     Grass = 'grass',
     Sandstone = 'sandstone',
     Vine = 'vine',
+    Cactus = 'cactus',
 }

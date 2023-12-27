@@ -24,7 +24,6 @@ export interface ItemDrop{
     max:number;
 }
 
-
 export interface Transform{
     x: number;
     y: number;
@@ -34,3 +33,6 @@ export interface Transform{
 
 export type Point = [number, number];
 export type Polygon = Point[];
+
+export enum ShaderType{
+}

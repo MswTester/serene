@@ -105,7 +105,7 @@ export const getPosByRot = (x:number, y:number, distance:number, angle:number):[
 }
 
 /** 시드 기반 사이트 생성 */
-export const makeArcSites = (seed:string, minDistance:number, maxDistance:number, minAngle:number, maxAngle:number, repeat:number, golgoru:boolean, grange:number, cx:number, cy:number):[number, number][] =>{
+export const makeArcSites = (seed:string, minDistance:number, maxDistance:number, minAngle:number, maxAngle:number, repeat:number, golgoru:boolean, grange:number, cx:number, cy:number):Point[] =>{
     let poses:[number, number][] = []
     for(let i = 0; i < repeat; i++){
         let angle = seededRandomInt(seed + `${i}`, minAngle, maxAngle);
@@ -122,15 +122,20 @@ export const makeArcSites = (seed:string, minDistance:number, maxDistance:number
 }
 
 /** 시드 기반 사이트 생성 */
-export const makeLineSites = (seed:string, minDistance:number, maxDistance:number, startAngle:number, minRadiusAngle:number, maxRadiusAngle:number, repeat:number, cx:number, cy:number):[number, number][] =>{
-    let poses:[number, number][] = []
+export const makeLineSites = (seed:string, minDistance:number, maxDistance:number, angle:number, radius:number, repeat:number, cx:number, cy:number, poses:Point[] = []):Point[] =>{
+    if(repeat == 0) return poses;
 
-    return poses;
+    let lastPos = poses[poses.length - 1] || [cx, cy];
+    let arcAngle = seededRandomInt(seed + `${repeat}`, angle - radius, angle + radius);
+    makeArcSites(seed + `${repeat}`, minDistance, maxDistance, arcAngle, arcAngle, 1, false, 1, ...lastPos).forEach(([x, y]) => {
+        poses.push([x, y]);
+    })
+    return makeLineSites(seed + `${repeat}`, minDistance, maxDistance, arcAngle, radius, repeat - 1, cx, cy, poses);
 }
 
 /** 시드 기반 사이트 생성 */
-// export const makeRootSites = (seed:string) => {
-// 
+// export const makeRootSites = (seed:string, minDistance:number, maxDistance:number, angle:number, radius:number) => {
+
 // }
 
 /** 배열을 suffle */

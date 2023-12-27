@@ -64,6 +64,11 @@ export default class Region {
     }
 }
 
+export interface RegionSaveFormat{
+    type:RegionType;
+    polygon:[number, number][];
+}
+
 export enum RegionType{
     Forest = 'forest',
     Forest_Deep = 'forest_deep',

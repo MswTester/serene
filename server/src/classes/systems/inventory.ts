@@ -1,4 +1,5 @@
-import Item from "../item";
+import { createItem } from "../creation/createItem";
+import Item, { ItemSaveFormat } from "../item";
 
 export default class Inventory{
     private Items:(Item|null)[] = [];
@@ -61,6 +62,16 @@ export default class Inventory{
                 return item.getSaveFormat();
             }
         });
+    }
+
+    static toInventory(items:(ItemSaveFormat|null)[]){
+        return new Inventory(items.length, items.map((item) => {
+            if(item == null){
+                return null;
+            } else {
+                return createItem(item.type, item.quantity, item.uuid);
+            }
+        }));
     }
 }
 

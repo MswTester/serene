@@ -28,7 +28,7 @@ export default class Structure{
     ownerGuildId:string;
 
     constructor(type:StructureType, name:string, maxHealth:number, hardness:number, defense:number, src:string, offsetWidth:number, offsetHeight:number, isCollidable:boolean,
-        x:number, y:number, width:number, height:number, ownerId:string, ownerGuildId:string){
+        x:number, y:number, width:number, height:number, ownerId?:string, ownerGuildId?:string, uuid?:string, health?:number){
         this.type = type;
         this.name = name;
         this.maxHealth = maxHealth;
@@ -39,15 +39,15 @@ export default class Structure{
         this.offsetHeight = offsetHeight;
         this.isCollidable = isCollidable;
 
-        this.uuid = generateUUID();
+        this.uuid = uuid != undefined ? uuid : generateUUID();
         this.events = new EventEmitter();
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.health = this.maxHealth;
-        this.ownerId = ownerId;
-        this.ownerGuildId = ownerGuildId;
+        this.health = health != undefined ? health : this.maxHealth;
+        this.ownerId = ownerId != undefined ? ownerId : "";
+        this.ownerGuildId = ownerGuildId != undefined ? ownerGuildId : "";
     }
 
     on(event:string, listener:(...args: any[]) => void){
@@ -69,6 +69,16 @@ export default class Structure{
             ownerGuildId: this.ownerGuildId
         }
     }
+}
+
+export interface StructureSaveFormat{
+    type:StructureType;
+    uuid:string;
+    x:number;
+    y:number;
+    health:number;
+    ownerId:string;
+    ownerGuildId:string;
 }
 
 export enum StructureType{

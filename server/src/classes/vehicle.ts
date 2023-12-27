@@ -33,7 +33,7 @@ export default class Vehicle{
     ownerGuildId:string;
 
     constructor(type:VehicleType, name:string, maxHealth:number, maxFuel:number, defense:number, src:string, offsetWidth:number, offsetHeight:number, isCollidable:boolean,
-        x:number, y:number, dx:number, dy:number, direction:Direction, width:number, height:number, ownerId:string, ownerGuildId:string){
+        x:number, y:number, dx:number, dy:number, direction:Direction, width:number, height:number, ownerId?:string, ownerGuildId?:string, uuid?:string, health?:number, fuel?:number){
         this.type = type;
         this.name = name;
         this.maxHealth = maxHealth;
@@ -44,7 +44,7 @@ export default class Vehicle{
         this.offsetHeight = offsetHeight;
         this.isCollidable = isCollidable;
 
-        this.uuid = generateUUID();
+        this.uuid = uuid != undefined ? uuid : generateUUID();
         this.events = new EventEmitter();
         this.x = x;
         this.y = y;
@@ -53,10 +53,10 @@ export default class Vehicle{
         this.direction = direction;
         this.width = width;
         this.height = height;
-        this.health = this.maxHealth;
-        this.fuel = this.maxFuel;
-        this.ownerId = ownerId;
-        this.ownerGuildId = ownerGuildId;
+        this.health = health != undefined ? health : this.maxHealth;
+        this.fuel = fuel != undefined ? fuel : this.maxFuel;
+        this.ownerId = ownerId != undefined ? ownerId : "";
+        this.ownerGuildId = ownerGuildId != undefined ? ownerGuildId : "";
     }
 
     on(event:string, listener:(...args: any[]) => void){
@@ -82,6 +82,20 @@ export default class Vehicle{
             ownerGuildId: this.ownerGuildId,
         }
     }
+}
+
+export interface VehicleSaveFormat{
+    type:VehicleType;
+    uuid:string;
+    x:number;
+    y:number;
+    dx:number;
+    dy:number;
+    direction:Direction;
+    health:number;
+    fuel:number;
+    ownerId:string;
+    ownerGuildId:string;
 }
 
 export enum VehicleType{

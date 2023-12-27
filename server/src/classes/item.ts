@@ -19,7 +19,7 @@ export default class Item{
 
     quantity:number = 1;
 
-    constructor(type:ItemType, maxStack:number, name:string, description:string, src:string, offsetX:number, offsetY:number, rotation:number, width:number, height:number, quantity:number = 1){
+    constructor(type:ItemType, maxStack:number, name:string, description:string, src:string, offsetX:number, offsetY:number, rotation:number, width:number, height:number, quantity:number = 1, uuid?:string){
         this.type = type;
         this.maxStack = maxStack;
         this.name = name;
@@ -31,7 +31,7 @@ export default class Item{
         this.width = width;
         this.height = height;
 
-        this.uuid = generateUUID();
+        this.uuid = uuid != undefined ? uuid : generateUUID();
         this.events = new EventEmitter();
         this.quantity = quantity;
     }
@@ -53,6 +53,12 @@ export default class Item{
     }
 }
 
+export interface ItemSaveFormat{
+    type:ItemType;
+    uuid:string;
+    quantity:number;
+}
+
 export enum ItemType{
     // Tool
     // Equipment
@@ -65,11 +71,11 @@ export enum ItemType{
     Leather = 'leather',
     Fur = 'fur',
     Fiber = 'fiber',
-    // Resources
     Wood = 'wood',
     Thatch = 'thatch',
     Stone = 'stone',
     Flint = 'flint',
+    Sand = 'sand',
     Iron = 'iron',
     Iron_Ingot = 'iron_ingot',
     Aluminum = 'aluminum',
