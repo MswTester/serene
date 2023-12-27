@@ -10,8 +10,8 @@ export default class Oak_Tree extends Resource {
         { item: ItemType.Wood, chance: 1, min: 1, max: 3 }
     ]
     static defaultRequiredTool:ItemType[] = [];
-    static defaultSrc:string = 'oak_tree.png';
-    static defaultOffsetWidth:number = 1.2;
+    static defaultSrc:string = 'resources/oak_tree.png';
+    static defaultOffsetWidth:number = 1;
     static defaultOffsetHeight:number = 2;
     static defaultIsCollidable:boolean = true;
     static defaultWidth:number = 1;

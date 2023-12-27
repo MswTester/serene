@@ -174,10 +174,10 @@ export enum CreatureType {
     Jungle_Titan = 'jungle_titan', // (jungle_deep) Boss, 나무를 조종하는 거대한 생명체
     Leviathan = 'leviathan', // (ocean_deep) Boss, 용과 고래를 합친 형태의 거대한 괴물고기
     Pheonix = 'pheonix', // (hell) Boss, 불을 뿜는 새
-    Void_Dragon = 'void_dragon', // (space) Boss, 우주를 지배하는 거대한 용
+    Guardian = 'guardian', // (space) Boss, 우주의 수호자
     
     // Fianl Boss
-    Guardian = 'guardian', // (space) Final Boss, 우주의 수호자
+    Overload = 'overload', // (space) Final Boss, 인간 형태의 
 
     // Others
 }

@@ -49,10 +49,6 @@ const clearRoute = (string: string): string => {
     return string.replace('\\dist', '').replace('\\src', '').replace('/src', '').replace('/dist', '')
 }
 
-app.get('/editor', (_req, res) => {
-    res.sendFile(clearRoute(__dirname) + '/app/editor.html');
-});
-
 app.get('/admin', (req, res) => {
     if(req.query['pw'] == config.adminPassword){
         res.sendFile(clearRoute(__dirname) + '/app/admin.html');
