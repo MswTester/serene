@@ -1,5 +1,4 @@
 import { EventEmitter } from "events";
-import { Direction } from "./types";
 import { generateUUID } from "./utils";
 
 export default class Vehicle{

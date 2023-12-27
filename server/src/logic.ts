@@ -1,11 +1,17 @@
 import { Server, Socket } from "socket.io";
-import { ServerConfig } from "./types";
 import { readFileSync, write, writeFileSync } from "fs";
 import World, { createWorld } from "./classes/world";
 import Player from "./player";
-import { ResourceType } from "./classes/resource";
-import { CreatureType } from "./classes/creature";
-import path from "path";
+
+interface ServerConfig{
+    name: string;
+    description: string;
+    date: string;
+    maxPlayers: number;
+    socket: Server;
+    adminPassword: string;
+    file?: string;
+}
 
 export default class ServerLogic {
     name: string = 'Serene Server';

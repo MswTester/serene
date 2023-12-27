@@ -1,7 +1,6 @@
 import Creature, { CreatureType } from "../creature";
 import Chilia from "../creatures/friendly/chilia";
 import { ItemSaveFormat } from "../item";
-import { Direction } from "../types";
 
 export const createCreature = (type:CreatureType, x:number, y:number, level:number, exp:number,
     uuid?:string, dx?:number, dy?:number, direction?:Direction,

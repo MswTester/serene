@@ -1,8 +1,6 @@
 import { EventEmitter } from 'events';
 import Creature, { CreatureType } from './creature';
 import Resource, { ResourceType } from './resource';
-import Forest from './regions/forest';
-import { SpawnMap } from './types';
 import { getPolygonArea, getRandomPositionInPolygon, isInsidePolygon, isIntersecting, rectToPolygon } from './utils';
 
 export default class Region {

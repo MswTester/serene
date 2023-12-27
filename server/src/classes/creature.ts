@@ -1,5 +1,4 @@
 import { EventEmitter } from "events";
-import { Direction, ItemDrop } from "./types";
 import { generateUUID } from "./utils";
 import Inventory from "./systems/inventory";
 

@@ -7,7 +7,6 @@ import Vehicle, { VehicleSaveFormat } from "./vehicle";
 import Structure, { StructureSaveFormat } from "./structure";
 import Region, { RegionSaveFormat, RegionType } from "./region";
 import { generateSeed, getPosByRot, makeArcSites, makeLineSites, randomFloat, randomInt, seededRandomInt } from "./utils";
-import { Point, Polygon, SpawnMap } from './types';
 import { createCreature } from './creation/createCreature';
 import { createRegion } from './creation/createRegion';
 import { createResource } from './creation/createResource';
@@ -181,7 +180,7 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     let structures:StructureSaveFormat[] = [];
     let regions:RegionSaveFormat[] = [];
 
-    let sites:[number, number, RegionType][] = [];
+    let sites:[Point, RegionType][] = [];
 
     const config = {
         centerForestCount: 45,
@@ -213,20 +212,20 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     const center:[number, number] = [width / 2, height / 2];
     let curSeed = seed;
 
-    makeArcSites(curSeed, 0, config.centerForestRange*mc, 0, 360, config.centerForestCount, false, 2, ...center).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
+    makeArcSites(curSeed, 0, config.centerForestRange*mc, 0, 360, config.centerForestCount, false, 2, ...center).forEach((pos) => {sites.push([pos, RegionType.Forest])})
     curSeed += config.centerForestCount.toString();
     let cla = seededRandomInt(curSeed, 0, 360)
     let clp = getPosByRot(...center, (0.01 * config.centerLakeCount) * mc, cla + 180)
-    makeLineSites(curSeed, 0.005*mc, 0.01*mc, cla, 20, config.centerLakeCount, ...clp).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
+    makeLineSites(curSeed, 0.005*mc, 0.01*mc, cla, 20, config.centerLakeCount, ...clp).forEach((pos) => {sites.push([pos, RegionType.Forest_Lake])})
     curSeed += config.centerLakeCount.toString();
     cla = seededRandomInt(curSeed, cla-100, cla+100)
     clp = getPosByRot(...center, (0.01 * config.centerLakeCount) * mc, cla + 180)
-    makeLineSites(curSeed, 0.01*mc, 0.02*mc, cla, 20, config.centerLakeCount, ...clp).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
+    makeLineSites(curSeed, 0.01*mc, 0.02*mc, cla, 20, config.centerLakeCount, ...clp).forEach((pos) => {sites.push([pos, RegionType.Forest_Lake])})
     curSeed += config.centerLakeCount.toString();
     const sr = (config.spaceRadius/2)
     for(let i = 0; i < config.spaceCount; i++){
         const angle = 360/config.spaceCount * i;
-        makeArcSites(curSeed, (1-config.spaceRange)*mc, 1*mc, angle-sr, angle+sr, 1, false, 1, ...center).forEach((pos) => {sites.push([...pos, RegionType.Space])})
+        makeArcSites(curSeed, (1-config.spaceRange)*mc, 1*mc, angle-sr, angle+sr, 1, false, 1, ...center).forEach((pos) => {sites.push([pos, RegionType.Space])})
         curSeed += 's'
     }
 
@@ -237,11 +236,11 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     const odr = (config.oceanDeepRadius/2)
     // ocean
     makeArcSites(curSeed, config.oceanDeepRange[0]*mc, config.oceanDeepRange[1]*mc, endAngle-odr, endAngle+odr, config.oceanDeepCount, true, 2, ...center).forEach((pos) => {
-        sites.push([...pos, RegionType.Ocean_Deep])
+        sites.push([pos, RegionType.Ocean_Deep])
     });
     curSeed += config.oceanDeepCount.toString();
     makeArcSites(curSeed, config.oceanRange[0]*mc, config.oceanRange[1]*mc, endAngle-or, endAngle+or, config.oceanCount, true, 2, ...center).forEach((pos) => {
-        sites.push([...pos, RegionType.Ocean])
+        sites.push([pos, RegionType.Ocean])
     });
     curSeed += config.oceanCount.toString();
 
@@ -249,40 +248,40 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     const hlr = (config.hellLavaRadius/2)
     // hell
     makeArcSites(curSeed, config.hellRange[0]*mc, config.hellRange[1]*mc, endAngle+180-hr, endAngle+180+hr, config.hellCount, true, 2, ...center).forEach((pos) => {
-        sites.push([...pos, RegionType.Hell])
+        sites.push([pos, RegionType.Hell])
     })
     curSeed += config.hellCount.toString();
     makeArcSites(curSeed, config.hellLavaRange[0]*mc, config.hellLavaRange[1]*mc, endAngle+180-hlr, endAngle+180+hlr, config.hellLavaCount, true, 2, ...center).forEach((pos) => {
-        sites.push([...pos, RegionType.Hell_Lava])
+        sites.push([pos, RegionType.Hell_Lava])
     })
     curSeed += config.hellLavaCount.toString();
 
     // outer 바이옴 생성
     makeArcSites(curSeed, config.outerBiomeRange[0]*mc, config.outerBiomeRange[1]*mc, 0, 360, 10, true, 6, ...center).forEach((pos, i) => {
         if(i % 3 == 0){
-            makeArcSites(curSeed, 0.1*mc, 0.12*mc, 0, 360, 11, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle])})
+            makeArcSites(curSeed, 0.1*mc, 0.12*mc, 0, 360, 11, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Jungle])})
             curSeed += 'oB0'
-            makeArcSites(curSeed, 0, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_Deep])})
+            makeArcSites(curSeed, 0, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Jungle_Deep])})
             curSeed += 'oB1'
-            makeArcSites(curSeed, 0.025*mc, 0.045*mc, 0, 360, 4, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle])})
+            makeArcSites(curSeed, 0.025*mc, 0.045*mc, 0, 360, 4, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Jungle])})
             curSeed += 'oB2'
-            makeArcSites(curSeed, 0.08*mc, 0.1*mc, 0, 360, 7, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_Deep])})
+            makeArcSites(curSeed, 0.08*mc, 0.1*mc, 0, 360, 7, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Jungle_Deep])})
             curSeed += 'oB3'
-            makeArcSites(curSeed, 0.06*mc, 0.08*mc, 0, 360, 5, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Jungle_River])})
+            makeArcSites(curSeed, 0.06*mc, 0.08*mc, 0, 360, 5, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Jungle_River])})
             curSeed += 'oB4'
         } else if(i % 3 == 1){
-            makeArcSites(curSeed, 0.11*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp])})
+            makeArcSites(curSeed, 0.11*mc, 0.12*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Swamp])})
             curSeed += 'oB5'
-            makeArcSites(curSeed, 0.02*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Water])})
+            makeArcSites(curSeed, 0.02*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Swamp_Water])})
             curSeed += 'oB6'
-            makeArcSites(curSeed, 0.08*mc, 0.1*mc, 0, 360, 8, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Swamp_Mud])})
+            makeArcSites(curSeed, 0.08*mc, 0.1*mc, 0, 360, 8, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Swamp_Mud])})
             curSeed += 'oB7'
         } else if(i % 3 == 2){
-            makeArcSites(curSeed, 0.1*mc, 0.11*mc, 0, 360, 5, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest])})
+            makeArcSites(curSeed, 0.1*mc, 0.11*mc, 0, 360, 5, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Forest])})
             curSeed += 'oB8'
-            makeArcSites(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Deep])})
+            makeArcSites(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Forest_Deep])})
             curSeed += 'oB9'
-            makeArcSites(curSeed, 0.02*mc, 0.06*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Forest_Lake])})
+            makeArcSites(curSeed, 0.02*mc, 0.06*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Forest_Lake])})
             curSeed += 'oB10'
         }
     })
@@ -290,32 +289,32 @@ export const createWorld = (width:number = 10000, height:number = 10000, seed:st
     // inner 바이옴 생성
     makeArcSites(curSeed, config.innerBiomeRange[0]*mc, config.innerBiomeRange[1]*mc, 0, 360, 7, true, 6, ...center).forEach((pos, i) => {
         if(i % 4 == 0){
-            makeArcSites(curSeed, 0.07*mc, 0.09*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave])})
+            makeArcSites(curSeed, 0.07*mc, 0.09*mc, 0, 360, 10, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Cave])})
             curSeed += 'iB0'
-            makeArcSites(curSeed, 0*mc, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Deep])})
+            makeArcSites(curSeed, 0*mc, 0.04*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Cave_Deep])})
             curSeed += 'iB1'
-            makeArcSites(curSeed, 0.04*mc, 0.06*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Cave_Dark])})
+            makeArcSites(curSeed, 0.04*mc, 0.06*mc, 0, 360, 3, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Cave_Dark])})
             curSeed += 'iB2'
         } else if(i % 4 == 1){
-            makeArcSites(curSeed, 0.06*mc, 0.08*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow])})
+            makeArcSites(curSeed, 0.06*mc, 0.08*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Snow])})
             curSeed += 'iB3'
-            makeArcSites(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Ice])})
+            makeArcSites(curSeed, 0.04*mc, 0.08*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Snow_Ice])})
             curSeed += 'iB4'
-            makeArcSites(curSeed, 0.02*mc, 0.04*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Snow_Lake])})
+            makeArcSites(curSeed, 0.02*mc, 0.04*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Snow_Lake])})
             curSeed += 'iB5'
         } else if(i % 4 == 2 || i % 4 == 3){
-            makeArcSites(curSeed, 0.06*mc, 0.1*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert])})
+            makeArcSites(curSeed, 0.06*mc, 0.1*mc, 0, 360, 6, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Desert])})
             curSeed += 'iB6'
-            makeArcSites(curSeed, 0.04*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Sandstone])})
+            makeArcSites(curSeed, 0.04*mc, 0.1*mc, 0, 360, 3, true, 3, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Desert_Sandstone])})
             curSeed += 'iB7'
-            makeArcSites(curSeed, 0, 0.024*mc, 0, 360, 2, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([...pos, RegionType.Desert_Oasis])})
+            makeArcSites(curSeed, 0, 0.024*mc, 0, 360, 2, true, 2, pos[0], pos[1]).forEach((pos) => {sites.push([pos, RegionType.Desert_Oasis])})
             curSeed += 'iB8'
         }
     })
 
-    let diagram = voronoi().extent([[0,0],[width, height]])(sites.map((site) => [site[0], site[1]]));
+    let diagram = voronoi().extent([[0,0],[width, height]])(sites.map((site) => [site[0][0], site[0][1]]));
     diagram.polygons().forEach((polygon:Polygon, i:number) => {
-        regions.push({type:sites[i][2], polygon:polygon.map((point:Point) => [Math.round(point[0]), Math.round(point[1])])});
+        regions.push({type:sites[i][1], polygon:polygon.map((point:Point) => [Math.round(point[0]), Math.round(point[1])])});
     });
 
     return new World(

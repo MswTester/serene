@@ -1,6 +1,5 @@
 import Region, { RegionType } from '../region';
 import { ResourceType } from '../resource';
-import { Polygon } from '../types';
 
 export default class Forest extends Region{
     constructor(polygon:Polygon){

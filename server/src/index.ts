@@ -1,8 +1,17 @@
 import express, { Response } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { ServerConfig } from './types';
 import ServerLogic from './logic';
+
+interface ServerConfig{
+    name: string;
+    description: string;
+    date: string;
+    maxPlayers: number;
+    socket: Server;
+    adminPassword: string;
+    file?: string;
+}
 
 const app = express();
 const httpServer = createServer(app);

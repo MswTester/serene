@@ -1,7 +1,6 @@
 import Creature, { CreatureType } from "../../creature";
 import { ItemSaveFormat } from "../../item";
 import Inventory from "../../systems/inventory";
-import { Direction, ItemDrop } from "../../types";
 
 export default class Chilia extends Creature {
     static defaultType:CreatureType = CreatureType.Chilia;

@@ -23,7 +23,7 @@ import Swamp from "../regions/swamp";
 import Swamp_Mud from "../regions/swamp_mud";
 import Swamp_Water from "../regions/swamp_water";
 
-export const createRegion = (type:RegionType, polygon:[number, number][]):Region => {
+export const createRegion = (type:RegionType, polygon:Polygon):Region => {
     switch(type){
         case RegionType.Forest:
             return new Forest(polygon);

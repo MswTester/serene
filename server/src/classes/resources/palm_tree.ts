@@ -1,6 +1,5 @@
 import { ItemType } from "../item";
 import Resource, { ResourceType } from "../resource";
-import { ItemDrop } from "../types";
 
 export default class Palm_Tree extends Resource {
     static defaultType:ResourceType = ResourceType.Palm_Tree;

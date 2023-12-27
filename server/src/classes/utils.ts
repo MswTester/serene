@@ -1,5 +1,4 @@
 import seedrandom from 'seedrandom'
-import { Point, Polygon } from './types';
 
 /** UUID 생성 */
 export const generateUUID = () => {

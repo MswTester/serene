@@ -1,5 +1,4 @@
 import Item, { ItemType } from "../item";
-import { SlotType } from "../systems/inventory";
 
 export default class Consumable extends Item {
     readonly useSpeed:number;

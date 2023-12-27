@@ -1,15 +1,11 @@
-import { CreatureType } from "./creature";
-import { ItemType } from "./item";
-import { ResourceType } from "./resource";
-
-export enum Direction{
+enum Direction{
     Up = 'up',
     Down = 'down',
     Left = 'left',
     Rigt = 'right',
 }
 
-export interface SpawnMap{
+interface SpawnMap{
     target:CreatureType | ResourceType;
     chance:number;
     min:number;
@@ -17,22 +13,22 @@ export interface SpawnMap{
     limit:number;
 }
 
-export interface ItemDrop{
+interface ItemDrop{
     item:ItemType;
     chance:number;
     min:number;
     max:number;
 }
 
-export interface Transform{
+interface Transform{
     x: number;
     y: number;
     width: number;
     height: number;
 }
 
-export type Point = [number, number];
-export type Polygon = Point[];
+type Point = [number, number];
+type Polygon = Point[];
 
-export enum ShaderType{
+enum ShaderType{
 }
