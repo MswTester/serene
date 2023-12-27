@@ -17,6 +17,7 @@ import Meteorite from "../items/materials/meteorite";
 import Mithril from "../items/materials/mithril";
 import Platinum from "../items/materials/platinum";
 import Ruby from "../items/materials/ruby";
+import Sand from "../items/materials/sand";
 import Stone from "../items/materials/stone";
 import Thatch from "../items/materials/thatch";
 import Thread from "../items/materials/thread";
@@ -46,6 +47,8 @@ export const createItem = (type:ItemType, amount:number, uuid?:string):Item => {
             return new Stone(amount, uuid);
         case ItemType.Flint:
             return new Flint(amount, uuid)
+        case ItemType.Sand:
+            return new Sand(amount, uuid);
         case ItemType.Iron:
             return new Iron(amount, uuid);
         case ItemType.Iron_Ingot:

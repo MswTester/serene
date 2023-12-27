@@ -47,7 +47,7 @@ export default class Creature {
 
     constructor(type: CreatureType, name: string, src: string, offsetWidth: number, offsetHeight: number,
         stateTypes:string[], baseHealth: number, baseDamage: number[], baseDefense: number, baseFood: number, baseSpeed: number[], drops: ItemDrop[],
-        x: number, y: number, dx: number, dy: number, direction: Direction, width: number, height: number, level:number, exp:number,
+        x: number, y: number, width: number, height: number, level:number, exp:number, dx?: number, dy?: number, direction?: Direction,
         uuid?:string, state?:string, health?:number, food?:number, inventory?:Inventory, isTamed?: boolean, ownerId?: string, ownerGuildId?: string) {
         this.type = type;
         this.name = name;
@@ -71,9 +71,9 @@ export default class Creature {
         this.food = food != undefined ? food : this.baseFood * (1+this.level/100);
         this.x = x;
         this.y = y;
-        this.dx = dx;
-        this.dy = dy;
-        this.direction = direction;
+        this.dx = dx || 0;
+        this.dy = dy || 0;
+        this.direction = direction || Direction.Down;
         this.width = width;
         this.height = height;
         this.inventory = inventory || new Inventory(10);

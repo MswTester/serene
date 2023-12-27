@@ -125,11 +125,29 @@ export default class ServerLogic {
                 let target2 = args[1];
                 let player2 = this.players.find((player) => player.uuid === target2);
                 if(player2) {
-                    this.socket.to(player.socketId).emit('kick', 'You have been banned from the server!');
-                    this.socket.to(player.socketId).disconnectSockets();
+                    this.socket.to(player2.socketId).emit('kick', 'You have been banned from the server!');
+                    this.socket.to(player2.socketId).disconnectSockets();
                     this.banPlayer(player2.uuid);
-                    this.banIP(player2.address);
                     return 'Player banned!';
+                } else {
+                    return 'Player not found!';
+                }
+            case '/ipban':
+                let target3 = args[1];
+                let player3 = this.players.find((player) => player.uuid === target3);
+                if(player3) {
+                    this.socket.to(player3.socketId).emit('kick', 'You have been banned from the server!');
+                    this.socket.to(player3.socketId).disconnectSockets();
+                    this.banIP(player3.address);
+                    return 'Player IP banned!';
+                } else {
+                    return 'Player not found!';
+                }
+            case 'getPlayerId':
+                let target4 = args[1];
+                let player4 = this.players.find((player) => player.name === target4);
+                if(player4) {
+                    return player4.uuid;
                 } else {
                     return 'Player not found!';
                 }
