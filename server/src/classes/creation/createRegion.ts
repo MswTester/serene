@@ -71,5 +71,7 @@ export const createRegion = (type:RegionType, polygon:[number, number][]):Region
             return new Hell_Lava(polygon);
         case RegionType.Space:
             return new Space(polygon);
+        default:
+            throw new Error('Invalid region type.');
     }
 }

@@ -77,5 +77,7 @@ export const createItem = (type:ItemType, amount:number, uuid?:string):Item => {
             return new Diamond(amount, uuid);
         case ItemType.Meteorite:
             return new Meteorite(amount, uuid);
+        default:
+            throw new Error('Invalid item type.');
     }
 }

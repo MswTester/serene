@@ -27,5 +27,7 @@ export const createResource = (type:ResourceType, x:number, y:number,
             return new Sandstone(x, y, uuid, health);
         case ResourceType.Cactus:
             return new Cactus(x, y, uuid, health);
+        default:
+            throw new Error('Invalid resource type.');
     }
 }
