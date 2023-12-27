@@ -27,8 +27,8 @@ interface Transform{
     height: number;
 }
 
-type Point = [number, number];
-type Polygon = Point[];
+declare type Point = [number, number];
+declare type Polygon = Point[];
 
 enum ShaderType{
 }
