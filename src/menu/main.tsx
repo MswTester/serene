@@ -13,7 +13,7 @@ export default function Menu() {
 
     useEffect(() => {
         const keydown = (e:KeyboardEvent) => {
-            if(e.code === 'KeyD' && e.altKey){
+            if(e.code === 'KeyD' && e.altKey && process.env.NODE_ENV === 'development'){
                 e.preventDefault();
                 setPage('dev');
             }
