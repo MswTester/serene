@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
-import { readFileSync, write, writeFileSync } from "fs";
+import { existsSync, readFileSync, write, writeFileSync } from "fs";
 import World, { createWorld } from "./classes/world";
-import Player from "./player";
+import User from "./user";
 
 interface ServerConfig{
     name: string;
@@ -20,7 +20,7 @@ export default class ServerLogic {
     maxPlayers: number = 100;
     socket:Server;
     chat: string[] = [];
-    players: Player[] = [];
+    users: User[] = [];
 
     // server data
     bannedID: string[] = [];
@@ -35,10 +35,14 @@ export default class ServerLogic {
         this.maxPlayers = config.maxPlayers;
         this.socket = config.socket;
         if(config.file) {
-            let world = JSON.parse(readFileSync(config.file).toString());
-            this.bannedID = world.bannedID;
-            this.bannedIP = world.bannedIP;
-            this.world = new World(world.resources, world.creatures, world.projectiles, world.vehicles, world.structures, world.regions, world.time, world.weather);
+            if(existsSync(config.file)){
+                let world = JSON.parse(readFileSync(config.file).toString());
+                this.bannedID = world.bannedID;
+                this.bannedIP = world.bannedIP;
+                this.world = new World(world.resources, world.creatures, world.projectiles, world.vehicles, world.structures, world.regions, world.time, world.weather, world.spawnTick, world.maxWildLevel);
+            } else {
+                this.world = createWorld();
+            }
         } else {
             this.world = createWorld();
         }
@@ -51,27 +55,24 @@ export default class ServerLogic {
             description: this.description,
             date: this.date,
             maxplayers: this.maxPlayers,
-            onlineplayers: this.players.length,
+            onlineplayers: this.users.length,
         };
     }
 
     on(){
+        this.world.init();
         this.socket.on('connection', (socket:Socket) => {
             console.log('a user connected', socket.handshake.address);
-
             // ingame
             socket.on('init', (data:{name:string;email:string;uuid:string}) => {
-                this.players.push(new Player(data.name, data.email, data.uuid, socket.id, socket.handshake.address));
-                if(this.bannedIP.includes(socket.handshake.address)) {
-                    socket.emit('kick', 'You are banned from this server!');
+                const kickPlayer = (reason:string) => {
+                    socket.emit('kick', reason);
                     socket.disconnect();
-                    return;
                 }
-                if(this.bannedID.includes(data.uuid)) {
-                    socket.emit('kick', 'You are banned from this server!');
-                    socket.disconnect();
-                    return;
-                }
+                if(this.users.find((player) => player.uuid === data.uuid)) return kickPlayer('You are already connected to this server!');
+                if(this.bannedIP.includes(socket.handshake.address)) return kickPlayer('You are banned from this server!');
+                if(this.bannedID.includes(data.uuid)) return kickPlayer('You are banned from this server!');
+                this.users.push(new User(data.name, data.email, data.uuid, socket.id, socket.handshake.address));
                 socket.emit('init', this.world.getWorldSaveFormat());
             });
 
@@ -94,7 +95,7 @@ export default class ServerLogic {
             // disconnection
             socket.on('disconnect', () => {
                 console.log('user disconnected');
-                this.players.splice(this.players.findIndex((player) => player.socketId === socket.id), 1);
+                this.users.splice(this.users.findIndex((player) => player.socketId === socket.id), 1);
             });
         });
         const loop = () => {
@@ -119,7 +120,7 @@ export default class ServerLogic {
         switch(main) {
             case '/kick':
                 let target = args[1];
-                let player = this.players.find((player) => player.uuid === target);
+                let player = this.users.find((player) => player.uuid === target);
                 if(player) {
                     this.socket.to(player.socketId).emit('kick', 'You have been kicked from the server!');
                     this.socket.to(player.socketId).disconnectSockets();
@@ -129,7 +130,7 @@ export default class ServerLogic {
                 }
             case '/ban':
                 let target2 = args[1];
-                let player2 = this.players.find((player) => player.uuid === target2);
+                let player2 = this.users.find((player) => player.uuid === target2);
                 if(player2) {
                     this.socket.to(player2.socketId).emit('kick', 'You have been banned from the server!');
                     this.socket.to(player2.socketId).disconnectSockets();
@@ -140,7 +141,7 @@ export default class ServerLogic {
                 }
             case '/ipban':
                 let target3 = args[1];
-                let player3 = this.players.find((player) => player.uuid === target3);
+                let player3 = this.users.find((player) => player.uuid === target3);
                 if(player3) {
                     this.socket.to(player3.socketId).emit('kick', 'You have been banned from the server!');
                     this.socket.to(player3.socketId).disconnectSockets();
@@ -151,7 +152,7 @@ export default class ServerLogic {
                 }
             case 'getPlayerId':
                 let target4 = args[1];
-                let player4 = this.players.find((player) => player.name === target4);
+                let player4 = this.users.find((player) => player.name === target4);
                 if(player4) {
                     return player4.uuid;
                 } else {
@@ -170,6 +171,8 @@ export default class ServerLogic {
         let world = {
             bannedID: this.bannedID,
             bannedIP: this.bannedIP,
+            spawnTick: this.world.spawnTick,
+            maxWildLevel: this.world.maxWildLevel,
             ...this.world.getWorldSaveFormat(),
         };
         writeFileSync(`./worlds/${route || 'world.json'}`, JSON.stringify(world), 'utf8');

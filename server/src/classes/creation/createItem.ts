@@ -11,7 +11,7 @@ import Flint from "../items/materials/flint";
 import Fur from "../items/materials/fur";
 import Gold from "../items/materials/gold";
 import Iron from "../items/materials/iron";
-import Iron_Ingot from "../items/materials/iron_metal";
+import Iron_Ingot from "../items/materials/iron_ingot";
 import Leather from "../items/materials/leather";
 import Meteorite from "../items/materials/meteorite";
 import Mithril from "../items/materials/mithril";

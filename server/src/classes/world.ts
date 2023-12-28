@@ -10,11 +10,15 @@ import { generateSeed, getPosByRot, makeArcSites, makeLineSites, randomFloat, ra
 import { createCreature } from './creation/createCreature';
 import { createRegion } from './creation/createRegion';
 import { createResource } from './creation/createResource';
+import { createProjectile } from './creation/createProjectile';
+import { createStructure } from './creation/createStructure';
+import { createVehicle } from './creation/createVehicle';
 
 export default class World{
 
     // world constants
-    spawnTick:number = 360; // 10 minutes
+    spawnTick:number = 36000; // 10 minutes
+    maxWildLevel:number = 50;
     mapWidth:number = 10000;
     mapHeight:number = 10000;
 
@@ -41,22 +45,24 @@ export default class World{
         structureData:any[],
         regionData:RegionSaveFormat[],
         time:number, weather:number,
-        spawnInterval:number = 360){
+        spawnTick?:number,
+        maxWildLevel?:number){
         this.resources = resourceData.map(v => createResource(v.type, v.x, v.y, v.uuid, v.health));
-        this.creatures = creatureData.map(v => createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId));
-        this.projectiles = projectileData;
-        this.vehicles = vehicleData;
-        this.structures = structureData;
+        this.creatures = creatureData.map(v => createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId, v.guildId));
+        this.projectiles = projectileData.map(v => createProjectile(v.type, v.x, v.y, v.dx, v.dy, v.rotation, v.ownerId, v.damageMultiplier, v.uuid));
+        this.vehicles = vehicleData.map(v => createVehicle(v.type, v.x, v.y, v.uuid, v.health, v.ownerId, v.ownerGuildId));
+        this.structures = structureData.map(v => createStructure(v.type, v.x, v.y, v.ownerId, v.ownerGuildId, v.uuid, v.health));
         this.regions = regionData.map(v => createRegion(v.type, v.polygon));
         this.time = time;
         this.weather = weather;
-        this.spawnTick = spawnInterval;
+        this.spawnTick = spawnTick || this.spawnTick;
+        this.maxWildLevel = maxWildLevel || this.maxWildLevel;
 
         this.events = new EventEmitter();
     }
 
     init(){
-        this.spawn();
+        this.spawn(10);
     }
 
     tick(){
@@ -66,15 +72,16 @@ export default class World{
         }
     }
 
-    spawn(){
+    spawn(multiplier:number = 1){
         let spawnCreatures:any[] = [];
         let spawnResources:any[] = [];
         this.regions.forEach((region:Region) => {
             let size:number = Math.sqrt(region.getSize());
             region.spawns.forEach((spawn:SpawnMap) => {
                 if(Math.random() < spawn.chance){
-                    let count = randomInt(Math.round(spawn.min * size), Math.round(spawn.max * size));
+                    let count = randomInt(Math.round(spawn.min * size), Math.round(spawn.max * size)) * multiplier;
                     let spawnLimit = Math.round(spawn.limit * size)
+                    count = Math.min(count, spawnLimit)
                     let isCreature = Object.values(CreatureType).includes(spawn.target as CreatureType);
                     let curCount = (
                         isCreature ?
@@ -88,7 +95,7 @@ export default class World{
                     for(let i = 0; i < count; i++){
                         let [x, y] = region.getRandomPoint().map(v => Math.round(v));
                         if(isCreature){
-                            const creature:Creature = createCreature(spawn.target as CreatureType, x, y, 1, 0)
+                            const creature:Creature = createCreature(spawn.target as CreatureType, x, y, randomInt(1, this.maxWildLevel), 0)
                             this.addCreature(creature);
                             spawnCreatures.push(creature.getSaveFormat());
                         } else {

@@ -9,7 +9,7 @@ export default class Grass extends Resource {
         { item: ItemType.Fiber, chance: 1, min: 3, max: 5 }
     ]
     static defaultRequiredTool:ItemType[] = [];
-    static defaultSrc:string = 'resources/grass.png';
+    static defaultSrc:string = 'resources/grass';
     static defaultOffsetWidth:number = 1;
     static defaultOffsetHeight:number = 1;
     static defaultIsCollidable:boolean = true;

@@ -8,7 +8,7 @@ export default class Cactus extends Resource {
     static defaultDrops:ItemDrop[] = [
     ]
     static defaultRequiredTool:ItemType[] = [];
-    static defaultSrc:string = 'resources/cactus.png';
+    static defaultSrc:string = 'resources/cactus';
     static defaultOffsetWidth:number = 1;
     static defaultOffsetHeight:number = 1.5;
     static defaultIsCollidable:boolean = true;

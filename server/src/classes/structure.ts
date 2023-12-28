@@ -82,8 +82,14 @@ export interface StructureSaveFormat{
 }
 
 export enum StructureType{
-    // House
-    // Wall
-    // Fence
-    // Others
+    // Craftable
+    Workbench = 'workbench',
+    // architecture
+    Wooden_Wall = 'wooden_wall',
+    Wooden_Door = 'wooden_door',
+    Wooden_Floor = 'wooden_floor',
+    // furniture
+    Bed = 'bed',
+    Chest = 'chest',
+    // other
 }

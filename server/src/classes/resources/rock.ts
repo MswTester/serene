@@ -9,7 +9,7 @@ export default class Rock extends Resource {
         { item: ItemType.Stone, chance: 1, min: 1, max: 3 }
     ]
     static defaultRequiredTool:ItemType[] = [];
-    static defaultSrc:string = 'resources/rock.png';
+    static defaultSrc:string = 'resources/rock';
     static defaultOffsetWidth:number = 1;
     static defaultOffsetHeight:number = 1;
     static defaultIsCollidable:boolean = true;

@@ -31,8 +31,8 @@ const config: ServerConfig = {
     date: new Date().toLocaleDateString(),
     maxPlayers: 100,
     socket: io,
-    adminPassword: 'jkds',
-    // file: 'world.json'
+    adminPassword: process.env.SERVER_ADMIN_PW || 'admin',
+    file: 'worlds/world.json'
 };
 
 const server: ServerLogic = new ServerLogic(config);

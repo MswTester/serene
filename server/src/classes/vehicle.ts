@@ -13,6 +13,7 @@ export default class Vehicle{
     readonly offsetWidth:number;
     readonly offsetHeight:number;
     readonly isCollidable:boolean;
+    readonly isNeedFuel:boolean;
 
     uuid:string;
     events:EventEmitter;
@@ -31,8 +32,8 @@ export default class Vehicle{
     ownerId:string;
     ownerGuildId:string;
 
-    constructor(type:VehicleType, name:string, maxHealth:number, maxFuel:number, defense:number, src:string, offsetWidth:number, offsetHeight:number, isCollidable:boolean,
-        x:number, y:number, dx:number, dy:number, direction:Direction, width:number, height:number, ownerId?:string, ownerGuildId?:string, uuid?:string, health?:number, fuel?:number){
+    constructor(type:VehicleType, name:string, maxHealth:number, maxFuel:number, defense:number, src:string, offsetWidth:number, offsetHeight:number, isCollidable:boolean, isNeedFuel:boolean,
+        x:number, y:number, dx:number, dy:number, width:number, height:number, direction?:Direction, ownerId?:string, ownerGuildId?:string, uuid?:string, health?:number, fuel?:number){
         this.type = type;
         this.name = name;
         this.maxHealth = maxHealth;
@@ -42,6 +43,7 @@ export default class Vehicle{
         this.offsetWidth = offsetWidth;
         this.offsetHeight = offsetHeight;
         this.isCollidable = isCollidable;
+        this.isNeedFuel = isNeedFuel;
 
         this.uuid = uuid != undefined ? uuid : generateUUID();
         this.events = new EventEmitter();
@@ -49,9 +51,9 @@ export default class Vehicle{
         this.y = y;
         this.dx = dx;
         this.dy = dy;
-        this.direction = direction;
         this.width = width;
         this.height = height;
+        this.direction = direction || Direction.Down;
         this.health = health != undefined ? health : this.maxHealth;
         this.fuel = fuel != undefined ? fuel : this.maxFuel;
         this.ownerId = ownerId != undefined ? ownerId : "";
@@ -98,10 +100,11 @@ export interface VehicleSaveFormat{
 }
 
 export enum VehicleType{
+    // Bike
+    Bike = 'bike',
     // Car
-    // Truck
     // Tank
-    // Plane
+    // Jet
     // Boat
     // Others
 }

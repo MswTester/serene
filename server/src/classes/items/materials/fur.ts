@@ -1,9 +1,28 @@
 import Item, { ItemType } from "../../item";
 
 export default class Fur extends Item {
+    static defaultType = ItemType.Fur;
+    static defaultMaxStack = 100;
+    static defaultName = 'Fur';
+    static defaultDescription = 'Warm and fuzzy.';
+    static defaultSrc = 'items/materials/fur';
+    static defaultOffsetX = 0;
+    static defaultOffsetY = 0;
+    static defaultRotation = 0;
+    static defaultWidth = 0.1;
+    static defaultHeight = 0.1;
     constructor(quantity:number = 1, uuid?:string) {
-        super(ItemType.Fur, 100, 'Fur',
-        'Warm and fuzzy.',
-        'items/materials/fur.png', 0.3, 0, 0, 0.2, 0.2, quantity, uuid);
+        super(
+            Fur.defaultType,
+            Fur.defaultMaxStack,
+            Fur.defaultName,
+            Fur.defaultDescription,
+            Fur.defaultSrc,
+            Fur.defaultOffsetX,
+            Fur.defaultOffsetY,
+            Fur.defaultRotation,
+            Fur.defaultWidth,
+            Fur.defaultHeight,
+            quantity, uuid);
     }
 }

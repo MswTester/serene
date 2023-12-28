@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 
-export default class Player{
+export default class User{
     name: string;
     email: string;
     uuid: string;

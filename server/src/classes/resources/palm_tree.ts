@@ -9,7 +9,7 @@ export default class Palm_Tree extends Resource {
         { item: ItemType.Wood, chance: 1, min: 1, max: 3 }
     ]
     static defaultRequiredTool:ItemType[] = [];
-    static defaultSrc:string = 'resources/palm_tree.png';
+    static defaultSrc:string = 'resources/palm_tree';
     static defaultOffsetWidth:number = 1;
     static defaultOffsetHeight:number = 2;
     static defaultIsCollidable:boolean = true;

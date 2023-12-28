@@ -10,7 +10,7 @@ export default class Cotton_Tree extends Resource {
         { item: ItemType.Cotton, chance: 1, min: 1, max: 2 }
     ]
     static defaultRequiredTool:ItemType[] = [];
-    static defaultSrc:string = 'resources/cotton_tree.png';
+    static defaultSrc:string = 'resources/cotton_tree';
     static defaultOffsetWidth:number = 1;
     static defaultOffsetHeight:number = 2;
     static defaultIsCollidable:boolean = true;

@@ -2,10 +2,19 @@ import Region, { RegionType } from '../region';
 import { ResourceType } from '../resource';
 
 export default class Hell_Lava extends Region{
+    static defaultType:RegionType = RegionType.Hell_Lava;
+    static defaultSrc:string = 'regions/hell_lava';
+    static defaultShades:string[] = [];
+    static defaultSpawns:SpawnMap[] = [];
+
+
     constructor(polygon:[number, number][]){
-        super(RegionType.Hell_Lava, 'regions/hell_lava.png', [],
-        [
-            // {target: ResourceType.Tree, chance: 0.5, min: 1, max: 3, limit: 5},
-        ], polygon);
+        super(
+            Hell_Lava.defaultType,
+            Hell_Lava.defaultSrc,
+            Hell_Lava.defaultShades,
+            Hell_Lava.defaultSpawns,
+            polygon
+        );
     }
 }

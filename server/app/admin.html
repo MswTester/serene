@@ -127,6 +127,11 @@
                 addToChat(data);
             });
 
+            let lastTime = Date.now();
+            let zoom = 0.1;
+            let pos = [0, 0];
+            let keys = {};
+
             const resize = () => {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
@@ -134,8 +139,6 @@
             resize();
             window.addEventListener('resize', resize);
 
-            let zoom = 0.1;
-            let pos = [0, 0];
 
             window.addEventListener('wheel', (e) => {
                 if(e.target != canvas) return;
@@ -143,7 +146,6 @@
                 zoom = Math.max(0.01, zoom);
             });
 
-            let keys = {};
             window.addEventListener('keydown', (e) => {
                 if(chat === document.activeElement) return;
                 keys[e.key] = true;
@@ -158,9 +160,8 @@
                 keys[e.key] = false;
             });
 
-            let lastTime = Date.now();
 
-            const update = () => {
+            function update(){
                 let time = Date.now();
                 let delta = time - lastTime;
                 lastTime = time;
@@ -184,8 +185,8 @@
                 world.creatures.push(...data[1]);
                 size = JSON.stringify(world).length
             });
-        
-            const render = () => {
+
+            function render(){
                 update();
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#000';
@@ -204,7 +205,7 @@
                 world.resources.forEach(resource => {
                     ctx.fillStyle = getColor(resource.type);
                     ctx.beginPath();
-                    ctx.arc((canvas.width/2) + resource.x * zoom + pos[0] * zoom, (canvas.height/2) + resource.y * zoom + pos[1] * zoom, 1*zoom, 0, Math.PI * 2);
+                    ctx.arc((canvas.width/2) + resource.x * zoom + pos[0] * zoom, (canvas.height/2) + resource.y * zoom + pos[1] * zoom, zoom/2, 0, Math.PI * 2);
                     ctx.fill();
                 });
 
@@ -217,7 +218,6 @@
                 ctx.fillText(`Resource: ${world.resources.length}`, 10, 150);
                 ctx.fillText(`Creatures: ${world.creatures.length}`, 10, 180);
                 ctx.fillText(`Projectiles: ${world.projectiles.length}`, 10, 210);
-
                 requestAnimationFrame(render);
             }
             render()

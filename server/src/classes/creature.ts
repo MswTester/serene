@@ -138,6 +138,7 @@ export interface CreatureSaveFormat {
     inventory: any[];
     ownerId: string;
     ownerGuildId: string;
+    guildId?: string;
 }
 
 export enum CreatureType {
@@ -198,4 +199,5 @@ export enum CreatureType {
     Overload = 'overload', // (space) Final Boss, 인간 형태의 
 
     // Others
+    Player = 'player',
 }

@@ -2,10 +2,19 @@ import Region, { RegionType } from '../region';
 import { ResourceType } from '../resource';
 
 export default class Swamp_Water extends Region{
+    static defaultType:RegionType = RegionType.Swamp_Water;
+    static defaultSrc:string = 'regions/swamp_water';
+    static defaultShades:string[] = [];
+    static defaultSpawns:SpawnMap[] = [];
+
+
     constructor(polygon:[number, number][]){
-        super(RegionType.Swamp_Water, 'regions/swamp_water.png', [],
-        [
-            // {target: ResourceType.Tree, chance: 0.5, min: 1, max: 3, limit: 5},
-        ], polygon);
+        super(
+            Swamp_Water.defaultType,
+            Swamp_Water.defaultSrc,
+            Swamp_Water.defaultShades,
+            Swamp_Water.defaultSpawns,
+            polygon
+        );
     }
 }

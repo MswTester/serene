@@ -25,8 +25,13 @@ export default function About() {
             </button>
             <h3 className="font-semibold text-5xl">Serene</h3>
             <p>Directed by MswTester</p>
-            <p>Programmer : MswTester</p>
+            <p>Developer : MswTester</p>
             <p>Designer : MswTester</p>
+            <p>Illustrator : MswTester</p>
+            <p>Music : MswTester</p>
+            <p>Sound : MswTester</p>
+            <p>Writer : MswTester</p>
+            <p>Tester : MswTester</p>
         </div>
     </div>
 }

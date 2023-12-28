@@ -10,7 +10,7 @@ export default class Sandstone extends Resource {
         { item: ItemType.Sand, chance: 1, min: 2, max: 3 }
     ]
     static defaultRequiredTool:ItemType[] = [];
-    static defaultSrc:string = 'resources/sandstone.png';
+    static defaultSrc:string = 'resources/sandstone';
     static defaultOffsetWidth:number = 1;
     static defaultOffsetHeight:number = 1;
     static defaultIsCollidable:boolean = true;

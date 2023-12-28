@@ -26,7 +26,7 @@ export default class Projectile{
     damageMultiplier:number;
 
     constructor(type:ProjectileType, maxDistance:number, damage:number, src:string, offsetWidth:number, offsetHeight:number,
-        x:number, y:number, dx:number, dy:number, rotation:number, width:number, height:number, ownerId:string, damageMultiplier:number, uuid?:string){
+        x:number, y:number, dx:number, dy:number, rotation:number, width:number, height:number, ownerId?:string, damageMultiplier?:number, uuid?:string){
         this.type = type;
         this.maxDistance = maxDistance;
         this.damage = damage;
@@ -43,8 +43,8 @@ export default class Projectile{
         this.rotation = rotation;
         this.width = width;
         this.height = height;
-        this.ownerId = ownerId;
-        this.damageMultiplier = damageMultiplier;
+        this.ownerId = ownerId || '';
+        this.damageMultiplier = damageMultiplier || 1;
     }
 
     on(event:string, listener:(...args: any[]) => void){
@@ -85,6 +85,7 @@ export interface ProjectileSaveFormat{
 export enum ProjectileType{
     // Bullet
     // Arrow
+    Arrow = 'arrow', // default stone arrow
     // Rocket
     // Grenade
     // Others

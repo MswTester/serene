@@ -2,10 +2,19 @@ import Region, { RegionType } from '../region';
 import { ResourceType } from '../resource';
 
 export default class Hell extends Region{
+    static defaultType:RegionType = RegionType.Hell;
+    static defaultSrc:string = 'regions/hell';
+    static defaultShades:string[] = [];
+    static defaultSpawns:SpawnMap[] = [];
+
+
     constructor(polygon:[number, number][]){
-        super(RegionType.Hell, 'regions/hell.png', [],
-        [
-            // {target: ResourceType.Tree, chance: 0.5, min: 1, max: 3, limit: 5},
-        ], polygon);
+        super(
+            Hell.defaultType,
+            Hell.defaultSrc,
+            Hell.defaultShades,
+            Hell.defaultSpawns,
+            polygon
+        );
     }
 }

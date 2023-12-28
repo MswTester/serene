@@ -2,10 +2,19 @@ import Region, { RegionType } from '../region';
 import { ResourceType } from '../resource';
 
 export default class Ocean_Deep extends Region{
+    static defaultType:RegionType = RegionType.Ocean_Deep;
+    static defaultSrc:string = 'regions/ocean_deep';
+    static defaultShades:string[] = [];
+    static defaultSpawns:SpawnMap[] = [];
+
+
     constructor(polygon:[number, number][]){
-        super(RegionType.Ocean_Deep, 'regions/ocean_deep.png', [],
-        [
-            // {target: ResourceType.Tree, chance: 0.5, min: 1, max: 3, limit: 5},
-        ], polygon);
+        super(
+            Ocean_Deep.defaultType,
+            Ocean_Deep.defaultSrc,
+            Ocean_Deep.defaultShades,
+            Ocean_Deep.defaultSpawns,
+            polygon
+        );
     }
 }
