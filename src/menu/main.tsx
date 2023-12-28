@@ -12,8 +12,18 @@ export default function Menu() {
     const [menuPage, setMenuPage] = useState<"main"|"server"|"settings"|"about">("main");
 
     useEffect(() => {
-        process.env.NODE_ENV === "development" ? setPage("dev") : setPage("menu");
-    })
+        const keydown = (e:KeyboardEvent) => {
+            if(e.code === 'KeyD' && e.altKey){
+                e.preventDefault();
+                setPage('dev');
+            }
+        }
+        document.addEventListener('keydown', keydown)
+
+        return () => {
+            document.removeEventListener('keydown', keydown)
+        }
+    }, [])
     
     return (<MenuContext.Provider value={{
         menuPage, setMenuPage,

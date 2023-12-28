@@ -67,7 +67,7 @@ export default function Index() {
     }
 
     return (<>
-        <div className="w-full h-full text-card-foreground shadow-sm bg-[#000000] flex justify-center items-center flex-col text-white" data-v0-t="card">
+        <div className="w-full h-full text-card-foreground shadow-sm bg-[#000000] flex justify-center items-center flex-col text-white" data-v0-t="card" style={{backgroundImage: `url(assets/loginbg.png)`}}>
             {loading && <div className="absolute inset-0 overflow-hidden">
                 <img src="assets/placeholder.svg" alt="Animated Background" className="object-cover absolute" width="100" height="100" style={{aspectRatio: "100 / 100", top:'50%', left:'50%', transform:'translate(-50%, -50%)'}} />
                 <div className="absolute inset-0 bg-black opacity-60"></div>

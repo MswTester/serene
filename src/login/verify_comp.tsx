@@ -20,7 +20,7 @@ export default function Index() {
         return () => unsubscribe();
     }, []);
 
-    return <div className="w-full h-full text-card-foreground shadow-sm bg-[#000000] flex justify-center items-center flex-col text-white" data-v0-t="card">
+    return <div className="w-full h-full text-card-foreground shadow-sm bg-[#000000] flex justify-center items-center flex-col text-white" data-v0-t="card" style={{backgroundImage: `url(assets/loginbg.png)`}}>
         <div className="flex flex-col space-y-1.5 p-6">
             <h3 className="font-semibold tracking-tight text-3xl text-center">Serene</h3>
             <p className="text-muted-foreground text-xl text-center">Verify your email</p>

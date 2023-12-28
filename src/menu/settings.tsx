@@ -24,11 +24,11 @@ const Main: FC = () => {
     </div>
 }
 
-const Video: FC = () => {
+const Video: FC = (props) => {
     return <div className="flex w-full">
         <div className="flex-1 flex justify-end p-2">Resolution</div>
         <div className="flex-1 flex justify-start p-2 gap-2">
-            <select name="resolution" id="resolution">
+            <select name="resolution" id="resolution" className={`inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 px-4 py-2 bg-[#ffffff] text-black`}>
                 <option value="1080p">1080p</option>
                 <option value="720p">720p</option>
                 <option value="480p">480p</option>
