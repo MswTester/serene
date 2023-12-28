@@ -45,6 +45,34 @@ export default function Index(){
         getServer(servers)
     }
 
+    const fetchServerData = async (server:fetchedServer) => {
+        try {
+            const res = await fetch(`http://${server.address}:${server.port}`);
+            const data = await res.json();
+            return {
+                name: data.name,
+                description: data.description,
+                date: data.date,
+                address: server.address,
+                port: server.port,
+                maxPlayers: data.maxplayers,
+                players: data.onlineplayers,
+                online: true
+            };
+        } catch (error) {
+            return {
+                name: `${server.address}:${server.port}`,
+                description: "Offline",
+                date: "Offline",
+                address: server.address,
+                port: server.port,
+                maxPlayers: 0,
+                players: 0,
+                online: false
+            };
+        }
+    }
+
     const getServer = async (nonfetched_servers:Server[]) => {
         let fetched_servers:fetchedServer[] = nonfetched_servers.map((server) => {
             return {
@@ -59,36 +87,13 @@ export default function Index(){
             }
         });
         setServers(fetched_servers);
-        fetched_servers = await Promise.all(fetched_servers.map(async (server) => {
-            try {
-                const res = await fetch(`http://${server.address}:${server.port}`);
-                const data = await res.json();
-                console.log(data)
-                return {
-                    name: data.name,
-                    description: data.description,
-                    date: data.date,
-                    address: server.address,
-                    port: server.port,
-                    maxPlayers: data.maxplayers,
-                    players: data.onlineplayers,
-                    online: true
-                }
-            } catch (error) {
-                console.log(error)
-                return {
-                    name: `${server.address}:${server.port}`,
-                    description: "Offline",
-                    date: "Offline",
-                    address: server.address,
-                    port: server.port,
-                    maxPlayers: 0,
-                    players: 0,
-                    online: false
-                }
-            }
-        }));
-        setServers(fetched_servers);
+        let res_servers:fetchedServer[] = []
+        for (const server of fetched_servers) {
+            fetchServerData(server).then((serverData:fetchedServer) => {
+                res_servers.push(serverData);
+                setServers(res_servers);
+            });
+        }
     }
 
     return (<div className="w-full h-full bg-cover text-white bg-black bg-center flex flex-col justify-center items-center overflow-hidden" style={{backgroundImage: `url(assets/mainbg.png)`}}>
@@ -115,13 +120,13 @@ export default function Index(){
                 <div className="space-y-2">
                 <label
                     className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-lg text-gray-200"
-                    htmlFor="search"
+                    htmlFor="map"
                 >
                     Search Map
                 </label>
                 <input
                     className="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-[#ffffff] text-black"
-                    id="search"
+                    id="map"
                     placeholder="Enter map name"
                     required={true}
                     type="text"
