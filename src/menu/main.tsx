@@ -1,4 +1,4 @@
-import { useContext, useState, createContext } from "react";
+import { useContext, useState, createContext, useEffect } from "react";
 import { globalContext } from "../App";
 
 import Server from "./server";
@@ -10,6 +10,10 @@ export const MenuContext = createContext<any>({});
 export default function Menu() {
     const {setPage} = useContext(globalContext);
     const [menuPage, setMenuPage] = useState<"main"|"server"|"settings"|"about">("main");
+
+    useEffect(() => {
+        process.env.NODE_ENV === "development" ? setPage("dev") : setPage("menu");
+    })
     
     return (<MenuContext.Provider value={{
         menuPage, setMenuPage,
