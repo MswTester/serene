@@ -14,7 +14,7 @@ import { createResource } from './creation/createResource';
 export default class World{
 
     // world constants
-    spawnTick:number = 36000; // 10 minutes
+    spawnTick:number = 360; // 10 minutes
     mapWidth:number = 10000;
     mapHeight:number = 10000;
 
@@ -41,7 +41,7 @@ export default class World{
         structureData:any[],
         regionData:RegionSaveFormat[],
         time:number, weather:number,
-        spawnInterval:number = 36000){
+        spawnInterval:number = 360){
         this.resources = resourceData.map(v => createResource(v.type, v.x, v.y, v.uuid, v.health));
         this.creatures = creatureData.map(v => createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId));
         this.projectiles = projectileData;
