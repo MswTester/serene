@@ -1,6 +1,5 @@
-import { EventEmitter } from "events";
-import Item, { ItemType } from "./item";
-import { generateUUID } from "./utils";
+import { ItemType } from "./item";
+import { generateUUID, EventEmitter } from "./utils";
 
 export default class Resource{
     readonly type:ResourceType;

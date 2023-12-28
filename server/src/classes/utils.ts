@@ -203,3 +203,17 @@ export function isIntersecting(polygon: Polygon, polygon2: Polygon): boolean {
 
     return false;
 }
+
+export class EventEmitter{
+    private events:Map<string, Function[]> = new Map();
+    on(event:string, callback:Function){
+        if(!this.events.has(event)) this.events.set(event, []);
+        this.events.get(event)?.push(callback);
+    }
+    emit(event:string, ...args:any[]){
+        if(!this.events.has(event)) return;
+        this.events.get(event)?.forEach(callback => {
+            callback(...args);
+        })
+    }
+}

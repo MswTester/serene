@@ -1,7 +1,6 @@
-import { EventEmitter } from 'events';
 import Creature, { CreatureType } from './creature';
 import Resource, { ResourceType } from './resource';
-import { getPolygonArea, getRandomPositionInPolygon, isInsidePolygon, isIntersecting, rectToPolygon } from './utils';
+import { getPolygonArea, getRandomPositionInPolygon, isInsidePolygon, EventEmitter } from './utils';
 
 export default class Region {
     readonly type:RegionType;

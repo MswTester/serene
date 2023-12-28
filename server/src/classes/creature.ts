@@ -1,5 +1,4 @@
-import { EventEmitter } from "events";
-import { generateUUID } from "./utils";
+import { generateUUID, EventEmitter } from "./utils";
 import Inventory from "./systems/inventory";
 
 export default class Creature {
