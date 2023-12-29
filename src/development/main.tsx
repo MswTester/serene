@@ -67,6 +67,7 @@ export default function Main() {
     const [isCtrlPressed, setIsCtrlPressed] = useState(false);
     const [isAltPressed, setIsAltPressed] = useState(false);
     const [isShiftPressed, setIsShiftPressed] = useState(false);
+    const [isMousedown, setIsMousedown] = useState(false);
 
     // 노드 생성 함수
     const createNode = (nodeClass: string) => {
@@ -75,7 +76,7 @@ export default function Main() {
             id: generateUUID(),
             class: nodeClass,
             type: "",
-            position: [(contextMenuPosition[0] - width/2)/viewport.zoom, (contextMenuPosition[1] - height/2)/viewport.zoom],
+            position: [(contextMenuPosition[0] - width/2 + viewport.position[0])/viewport.zoom, (contextMenuPosition[1] - height/2 + viewport.position[1])/viewport.zoom],
             contents: {},
             childIds: []
         };
@@ -365,17 +366,15 @@ export default function Main() {
         if (isDragging) {
             const handleMousemove = (event:MouseEvent) => {
                 setDragOffset([event.clientX - dragStart[0], event.clientY - dragStart[1]]);
+                if(isCtrlPressed && isMousedown){
+                    let newViewport = { ...viewport, position: [viewport.position[0] - event.movementX / viewport.zoom, viewport.position[1] - event.movementY / viewport.zoom] };
+                    setViewport(newViewport);
+                }
             };
             const handleMouseup = () => {
                 window.removeEventListener("mousemove", handleMousemove);
                 window.removeEventListener("mouseup", handleMouseup);
                 if(dragOffset[0] === 0 && dragOffset[1] === 0) return;
-                // viewport 이동
-                if(isCtrlPressed){
-                    let newViewport = { ...viewport, position: [viewport.position[0] - dragOffset[0] / viewport.zoom, viewport.position[1] - dragOffset[1] / viewport.zoom] };
-                    setViewport(newViewport);
-                }
-                // 노드 이동
                 if(selectedNodes.length === 0) return;
                 setHistory([...history.slice(0, undoIdx + 1), nodes]);
                 setUndoIdx(undoIdx + 1);
@@ -394,8 +393,12 @@ export default function Main() {
             };
             window.addEventListener("mousemove", handleMousemove);
             window.addEventListener("mouseup", handleMouseup);
+            return () => {
+                window.removeEventListener("mousemove", handleMousemove);
+                window.removeEventListener("mouseup", handleMouseup);
+            }
         }
-    }, [isDragging, selectedNodes, dragStart, dragOffset, nodes, selectedNodes, isCtrlPressed, isAltPressed, isShiftPressed, viewport]);
+    }, [isDragging, selectedNodes, dragStart, dragOffset, nodes, selectedNodes, isCtrlPressed, isShiftPressed, viewport, isMousedown]);
 
     useEffect(() => {
         const handleKeydown = (event:KeyboardEvent) => {
@@ -445,6 +448,21 @@ export default function Main() {
         }
         window.addEventListener("blur", focusOut);
         return () => window.removeEventListener("blur", focusOut);
+    }, []);
+
+    useEffect(() => {
+        const handleMousedown = () => {
+            setIsMousedown(true);
+        };
+        const handleMouseup = () => {
+            setIsMousedown(false);
+        };
+        window.addEventListener("mousedown", handleMousedown);
+        window.addEventListener("mouseup", handleMouseup);
+        return () => {
+            window.removeEventListener("mousedown", handleMousedown);
+            window.removeEventListener("mouseup", handleMouseup);
+        }
     }, []);
 
     return (
