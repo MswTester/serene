@@ -26,5 +26,3 @@ interface fetchedServer{
     maxPlayers: number;
     online: boolean;
 }
-
-type classes = "resource" | "creature" | "projectile" | "item" | "structure" | "vehicle" | "effect" | "region" | "region"
