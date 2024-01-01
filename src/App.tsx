@@ -6,7 +6,6 @@ import './styles/global.css'
 import Login from './login/main';
 import Menu from './menu/main';
 import Game from './game/main';
-import Dev from './development/main';
 
 export const globalContext = createContext<CT|any>({});
 
@@ -38,7 +37,6 @@ function App() {
     {page === "login" ? <Login /> :
     page === "menu" ? <Menu /> :
     page === "game" ? <Game /> :
-    page === "dev" ? <Dev/> :
     <></>}
   </globalContext.Provider>: <></>);
 }

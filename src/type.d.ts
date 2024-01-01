@@ -9,7 +9,7 @@ interface CT{
     setSocket: React.Dispatch<React.SetStateAction<SocketIOClient.Socket>>;
 }
 
-type Page = "menu" | "login" | "game" | "dev"
+type Page = "menu" | "login" | "game"
 
 interface Server{
     address: string;

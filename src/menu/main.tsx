@@ -13,10 +13,6 @@ export default function Menu() {
 
     useEffect(() => {
         const keydown = (e:KeyboardEvent) => {
-            if(e.code === 'KeyD' && e.altKey){
-                e.preventDefault();
-                setPage('dev');
-            }
         }
         document.addEventListener('keydown', keydown)
 
