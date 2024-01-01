@@ -406,7 +406,7 @@ export default function Main(){
 
     useEffect(() => {
         const handleCopy = (e: KeyboardEvent) => {
-            if(e.key === 'c' && e.ctrlKey){
+            if(e.code === 'KeyC' && e.ctrlKey){
                 setClipboard(nodes.filter(v => selectedNodes.includes(v.id)))
             }
         }
@@ -417,20 +417,37 @@ export default function Main(){
     }, [nodes, selectedNodes])
 
     useEffect(() => {
+        const handleCut = (e: KeyboardEvent) => {
+            if(e.code === 'KeyX' && e.ctrlKey){
+                setClipboard(nodes.filter(v => selectedNodes.includes(v.id)))
+                setNodes(nodes.filter(v => !selectedNodes.includes(v.id)))
+                setSelectedNodes([])
+                saveHistory()
+            }
+        }
+        window.addEventListener('keydown', handleCut)
+        return () => {
+            window.removeEventListener('keydown', handleCut)
+        }
+    }, [nodes, selectedNodes, history, historyIndex])
+
+    useEffect(() => {
         const handlePaste = (e: KeyboardEvent) => {
-            if(e.key === 'v' && e.ctrlKey){
+            if(e.code === 'KeyV' && e.ctrlKey){
                 setNodes([...nodes, ...clipboard.map(v => new Node(v.classer, v.type, [v.position[0] + 10, v.position[1] + 10], generateRandomString(10), v.fields, v.children, v.thumbnail))])
+                setSelectedNodes(clipboard.map(v => v.id))
+                saveHistory()
             }
         }
         window.addEventListener('keydown', handlePaste)
         return () => {
             window.removeEventListener('keydown', handlePaste)
         }
-    }, [nodes, clipboard])
+    }, [nodes, clipboard, history, historyIndex])
 
     useEffect(() => {
         const handleDuplicate = (e: KeyboardEvent) => {
-            if(e.key === 'd' && e.ctrlKey){
+            if(e.code === 'KeyD' && e.ctrlKey){
                 e.preventDefault()
                 let add = nodes.filter(v => selectedNodes.includes(v.id)).map(v => new Node(v.classer, v.type, [v.position[0] + 10, v.position[1] + 10], generateRandomString(10), v.fields, v.children, v.thumbnail))
                 setNodes([...nodes, ...add])
@@ -446,7 +463,7 @@ export default function Main(){
 
     useEffect(() => {
         const handleUndo = (e: KeyboardEvent) => {
-            if(e.key === 'z' && e.ctrlKey){
+            if(e.code === 'KeyZ' && e.ctrlKey){
                 e.preventDefault()
                 if(historyIndex > 0){
                     restoreHistory(historyIndex - 1)
@@ -461,7 +478,7 @@ export default function Main(){
 
     useEffect(() => {
         const handleRedo = (e: KeyboardEvent) => {
-            if(e.key === 'y' && e.ctrlKey){
+            if(e.code === 'KeyY' && e.ctrlKey){
                 e.preventDefault()
                 if(historyIndex < history.length - 1){
                     restoreHistory(historyIndex + 1)
@@ -476,7 +493,7 @@ export default function Main(){
 
     useEffect(() => {
         const handleSelectAll = (e: KeyboardEvent) => {
-            if(e.key === 'a' && e.ctrlKey){
+            if(e.code === 'KeyA' && e.ctrlKey){
                 e.preventDefault()
                 setSelectedNodes(nodes.map(v => v.id))
             }
@@ -501,7 +518,8 @@ export default function Main(){
 
     useEffect(() => {
         const handleResetViewport = (e: KeyboardEvent) => {
-            if(e.code === 'KeyR'){
+            if(e.code === 'KeyR' || e.ctrlKey){
+                e.preventDefault()
                 setViewport([0, 0, 1])
             }
         }
