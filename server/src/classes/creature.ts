@@ -138,6 +138,7 @@ export interface CreatureSaveFormat {
     ownerId: string;
     ownerGuildId: string;
     guildId?: string;
+    name?: string;
 }
 
 export enum CreatureType {

@@ -20,10 +20,10 @@ export default class Player extends Creature {
 
     readonly guildId:string;
 
-    constructor(x:number, y:number, lvl:number, exp:number, uuid?:string, dx?:number, dy?:number, direction?:Direction, state?:string, health?:number, food?:number, inventory?:(ItemSaveFormat|null)[], guildId?:string) {
+    constructor(x:number, y:number, lvl:number, exp:number, name?:string, uuid?:string, dx?:number, dy?:number, direction?:Direction, state?:string, health?:number, food?:number, inventory?:(ItemSaveFormat|null)[], guildId?:string) {
         super(
             Player.defaultType,
-            Player.defaultName,
+            name || Player.defaultName,
             Player.defaultSrc,
             Player.defaultOffsetWidth,
             Player.defaultOffsetHeight,
@@ -63,7 +63,8 @@ export default class Player extends Creature {
             inventory: this.inventory.getSaveFormat(),
             ownerId: '',
             ownerGuildId: '',
-            guildId: this.guildId
+            guildId: this.guildId,
+            name: this.name,
         }
     }
 }

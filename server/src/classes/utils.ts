@@ -204,6 +204,15 @@ export function isIntersecting(polygon: Polygon, polygon2: Polygon): boolean {
     return false;
 }
 
+/** 청크 */
+export const isInChunk = (x:number, y:number, cx:number, cy:number, chunkSize:number, gap:number) => {
+    let myChunkX = Math.floor(x / chunkSize);
+    let myChunkY = Math.floor(y / chunkSize);
+    let targetChunkX = Math.floor(cx / chunkSize);
+    let targetChunkY = Math.floor(cy / chunkSize);
+    return myChunkX >= targetChunkX - gap && myChunkX <= targetChunkX + gap && myChunkY >= targetChunkY - gap && myChunkY <= targetChunkY + gap;
+}
+
 export class EventEmitter {
     private events: Map<string, Function[]> = new Map();
 

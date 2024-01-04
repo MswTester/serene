@@ -6,7 +6,7 @@ import Projectile, { ProjectileSaveFormat } from "./projectile";
 import Vehicle, { VehicleSaveFormat } from "./vehicle";
 import Structure, { StructureSaveFormat } from "./structure";
 import Region, { RegionSaveFormat, RegionType } from "./region";
-import { generateSeed, getPosByRot, makeArcSites, makeLineSites, randomFloat, randomInt, seededRandomInt } from "./utils";
+import { generateSeed, getPosByRot, isInChunk, makeArcSites, makeLineSites, randomFloat, randomInt, seededRandomInt } from "./utils";
 import { createCreature } from './creation/createCreature';
 import { createRegion } from './creation/createRegion';
 import { createResource } from './creation/createResource';
@@ -45,10 +45,12 @@ export default class World{
         structureData:any[],
         regionData:RegionSaveFormat[],
         time:number, weather:number,
+
         spawnTick?:number,
-        maxWildLevel?:number){
+        maxWildLevel?:number
+        ){
         this.resources = resourceData.map(v => createResource(v.type, v.x, v.y, v.uuid, v.health));
-        this.creatures = creatureData.map(v => createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId, v.guildId));
+        this.creatures = creatureData.map(v => createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId, v.guildId, v.name));
         this.projectiles = projectileData.map(v => createProjectile(v.type, v.x, v.y, v.dx, v.dy, v.rotation, v.ownerId, v.damageMultiplier, v.uuid));
         this.vehicles = vehicleData.map(v => createVehicle(v.type, v.x, v.y, v.uuid, v.health, v.ownerId, v.ownerGuildId));
         this.structures = structureData.map(v => createStructure(v.type, v.x, v.y, v.ownerId, v.ownerGuildId, v.uuid, v.health));
@@ -153,12 +155,12 @@ export default class World{
 
     getWorldObjects(){
         return {
-            resources: this.resources.map((resource) => resource.getSaveFormat()),
-            creatures: this.creatures.map((creature) => creature.getSaveFormat()),
-            projectiles: this.projectiles.map((projectile) => projectile.getSaveFormat()),
-            vehicles: this.vehicles.map((vehicle) => vehicle.getSaveFormat()),
-            structures: this.structures.map((structure) => structure.getSaveFormat()),
-            regions: this.regions.map((region) => region.getSaveFormat()),
+            resources: this.resources,
+            creatures: this.creatures,
+            projectiles: this.projectiles,
+            vehicles: this.vehicles,
+            structures: this.structures,
+            regions: this.regions
         }
     }
 
@@ -173,6 +175,23 @@ export default class World{
             structures: this.structures.map((structure) => structure.getSaveFormat()),
             regions: this.regions.map((region) => region.getSaveFormat()),
         }
+    }
+
+    getWorldObjectsByChunk(x:number, y:number){
+        return {
+            resources: this.resources.filter((resource) => isInChunk(x, y, resource.x, resource.y, 32, 1)).map((resource) => resource.getSaveFormat()),
+            creatures: this.creatures.filter((creature) => isInChunk(x, y, creature.x, creature.y, 32, 1)).map((creature) => creature.getSaveFormat()),
+            projectiles: this.projectiles.filter((projectile) => isInChunk(x, y, projectile.x, projectile.y, 32, 1)).map((projectile) => projectile.getSaveFormat()),
+            vehicles: this.vehicles.filter((vehicle) => isInChunk(x, y, vehicle.x, vehicle.y, 32, 1)).map((vehicle) => vehicle.getSaveFormat()),
+            structures: this.structures.filter((structure) => isInChunk(x, y, structure.x, structure.y, 32, 1)).map((structure) => structure.getSaveFormat()),
+            regions: this.regions.map(v => v.getSaveFormat()),
+        }
+    }
+
+    getSpawn(){
+        const forests = this.regions.filter((region) => region.type === RegionType.Forest)
+        const [x, y] = forests[Math.floor(Math.random() * forests.length)].getRandomPoint();
+        return {x, y}
     }
 }
 

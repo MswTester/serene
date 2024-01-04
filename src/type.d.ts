@@ -26,3 +26,6 @@ interface fetchedServer{
     maxPlayers: number;
     online: boolean;
 }
+
+type Point = [number, number];
+type Polygon = Point[];

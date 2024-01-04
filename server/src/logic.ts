@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { existsSync, readFileSync, write, writeFileSync } from "fs";
 import World, { createWorld } from "./classes/world";
 import User from "./user";
+import Player from "./classes/creatures/others/player";
 
 interface ServerConfig{
     name: string;
@@ -62,9 +63,11 @@ export default class ServerLogic {
     on(){
         this.world.init();
         this.socket.on('connection', (socket:Socket) => {
-            console.log('a user connected', socket.handshake.address);
             // ingame
             socket.on('init', (data:{name:string;email:string;uuid:string}) => {
+                // player connection
+                console.log('a user connected', socket.handshake.address);
+                // ban & kick
                 const kickPlayer = (reason:string) => {
                     socket.emit('kick', reason);
                     socket.disconnect();
@@ -72,8 +75,27 @@ export default class ServerLogic {
                 if(this.users.find((player) => player.uuid === data.uuid)) return kickPlayer('You are already connected to this server!');
                 if(this.bannedIP.includes(socket.handshake.address)) return kickPlayer('You are banned from this server!');
                 if(this.bannedID.includes(data.uuid)) return kickPlayer('You are banned from this server!');
+                // accept player
                 this.users.push(new User(data.name, data.email, data.uuid, socket.id, socket.handshake.address));
-                socket.emit('init', this.world.getWorldSaveFormat());
+
+                // check player exists in world
+                let player = this.world.getWorldObjects().creatures.find((creature) => creature.uuid === data.uuid) as Player;
+                if(!player) {
+                    let spawn = this.world.getSpawn();
+                    // create player
+                    player = new Player(spawn.x, spawn.y, 1, 0, data.name, data.uuid);
+                    this.world.addCreature(player);
+                }
+                socket.emit('init', {
+                    player: player.getSaveFormat(),
+                    ...this.world.getWorldObjectsByChunk(player.x, player.y),
+                });
+
+                socket.on('chat', (message:string) => {
+                    this.chat.push(message);
+                    socket.emit('chat', message);
+                    socket.broadcast.emit('chat', message);
+                });
             });
 
             // admin
@@ -150,7 +172,7 @@ export default class ServerLogic {
                 } else {
                     return 'Player not found!';
                 }
-            case 'getPlayerId':
+            case '/getplayerid':
                 let target4 = args[1];
                 let player4 = this.users.find((player) => player.name === target4);
                 if(player4) {
