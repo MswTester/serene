@@ -1,8 +1,10 @@
 import { Server, Socket } from "socket.io";
-import { existsSync, readFileSync, write, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import World, { createWorld } from "./classes/world";
 import User from "./user";
 import Player from "./classes/creatures/others/player";
+import Creature, { CreatureSaveFormat } from "./classes/creature";
+import { EventEmitter, isInChunk } from "./classes/utils";
 
 interface ServerConfig{
     name: string;
@@ -22,12 +24,16 @@ export default class ServerLogic {
     socket:Server;
     chat: string[] = [];
     users: User[] = [];
+    updater:{[key:string]:any}[] = [];
+    remove:string[] = [];
+    add:string[] = [];
 
     // server data
     bannedID: string[] = [];
     bannedIP: string[] = [];
 
     world: World
+    events: EventEmitter = new EventEmitter();
 
     constructor(config:ServerConfig) {
         this.name = config.name;
@@ -60,7 +66,7 @@ export default class ServerLogic {
         };
     }
 
-    on(){
+    start(){
         this.world.init();
         this.socket.on('connection', (socket:Socket) => {
             // ingame
@@ -79,7 +85,7 @@ export default class ServerLogic {
                 this.users.push(new User(data.name, data.email, data.uuid, socket.id, socket.handshake.address));
 
                 // check player exists in world
-                let player = this.world.getWorldObjects().creatures.find((creature) => creature.uuid === data.uuid) as Player;
+                let player:Player = this.world.getWorldObjects().creatures.find((creature) => creature.uuid == data.uuid) as Player;
                 if(!player) {
                     let spawn = this.world.getSpawn();
                     // create player
@@ -96,6 +102,17 @@ export default class ServerLogic {
                     socket.emit('chat', message);
                     socket.broadcast.emit('chat', message);
                 });
+
+                socket.on('tick', (player:CreatureSaveFormat) => {
+                    let curPlayer = (this.world.getWorldObjects().creatures.find(v => v.uuid == player.uuid) as Player)
+                    curPlayer.tickUpdate(player.x, player.y, player.dx, player.dy)
+                    this.addUpdater(curPlayer.getSaveFormat())
+                })
+
+                this.on('tick', (updater:{[key:string]:any}[], add:string[], remove:string[]) => {
+                    let myChar = this.world.getWorldObjects().creatures.find(v => v.uuid == data.uuid) as Player
+                    socket.emit('updater', updater.filter((v) => isInChunk(myChar.x, myChar.y, v.x, v.y, 32, 1)))
+                })
             });
 
             // admin
@@ -112,6 +129,19 @@ export default class ServerLogic {
                     socket.emit('chat', message);
                     socket.broadcast.emit('chat', message);
                 });
+
+
+                this.world.on('spawn', (resources:[], creatures:[]) => {
+                    socket.emit('spawn', [resources, creatures]);
+                })
+
+                this.world.on('creatureSpawn', (creature:Creature) => {
+                    socket.emit('creatureSpawn', creature.getSaveFormat())
+                })
+
+                this.on('tick', (updater:{[key:string]:any}[], add:string[], remove:string[]) => {
+                    socket.emit('updater', updater)
+                })
             })
 
             // disconnection
@@ -120,20 +150,20 @@ export default class ServerLogic {
                 this.users.splice(this.users.findIndex((player) => player.socketId === socket.id), 1);
             });
         });
+
         const loop = () => {
             this.world.tick();
-            this.socket.emit('tickUpdate', {
+            this.socket.emit('tick', {
                 time: this.world.time,
-                weather: this.world.weather,
+                weather: this.world.weather
             });
+            this.emit('tick', this.updater, this.add, this.remove)
+            this.updater = []
+            this.add = []
+            this.remove = []
             setTimeout(loop, 1000 / 60);
         };
         loop();
-
-        this.world.on('spawn', (resources:[], creatures:[]) => {
-            console.log('spawning...');
-            this.socket.emit('spawn', [resources, creatures]);
-        })
     }
 
     command(command:string):string {
@@ -183,6 +213,14 @@ export default class ServerLogic {
             case '/save':
                 this.saveWorld(args[1]);
                 return 'World saved!';
+            case '/getcreature':
+                let target5 = args[1];
+                let target5found = this.world.getWorldObjects().creatures.find((creature) => creature.uuid === target5);
+                if(target5found) {
+                    return JSON.stringify(target5found.getSaveFormat()).split(',').join(',\n').replace('{', '{\n').replace('}', '\n}').replace('[', '[\n').replace(']', '\n]');
+                } else {
+                    return 'Creature not found!';
+                }
             default:
                 return 'Unknown command';
         }
@@ -207,5 +245,17 @@ export default class ServerLogic {
 
     banIP(ip:string) {
         this.bannedIP.push(ip);
+    }
+
+    addUpdater(data:{[key:string]:any}){
+        this.updater = [...this.updater.filter(v => v.uuid !== data.uuid), data]
+    }
+
+    on(event:string, callback:(...args: any[]) => void){
+        this.events.on(event, callback);
+    }
+
+    emit(event:string, ...args: any[]){
+        this.events.emit(event, ...args);
     }
 }

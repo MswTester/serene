@@ -67,6 +67,6 @@ app.get('/admin', (req, res) => {
 })
 
 httpServer.listen(PORT, () => {
-    server.on()
+    server.start()
     console.log(`listening on *:${PORT}\nAdmin Password : ${config.adminPassword}`);
 });

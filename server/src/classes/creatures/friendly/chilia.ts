@@ -32,10 +32,11 @@ export default class Chilia extends Creature {
             Chilia.defaultBaseFood,
             Chilia.defaultBaseSpeed,
             Chilia.defaultDrops,
+            x, y,
             Chilia.defaultWidth,
             Chilia.defaultHeight,
             lvl, exp,
-            x, y, dx, dy, direction,
+            dx, dy, direction,
             uuid, state, health, food,
             inventory != undefined ? Inventory.toInventory(inventory) : new Inventory(),
             isTamed, ownerId, ownerGuildId

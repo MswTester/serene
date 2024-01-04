@@ -186,6 +186,18 @@
                 size = JSON.stringify(world).length
             });
 
+            socket.on('creatureSpawn', (data) => {
+                world.creatures.push(data)
+            })
+
+            socket.on('updater', (data) => {
+                data.forEach(v => {
+                    world.creatures[world.creatures.findIndex(vv => vv.uuid == v.uuid)] = v
+                    console.log(v)
+                    // world.creatures.find(vv => v.uuid == vv.uuid) = v
+                })
+            })
+
             function render(){
                 update();
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -209,6 +221,13 @@
                     ctx.fill();
                 });
 
+                world.creatures.forEach(creature => {
+                    ctx.fillStyle = getColor(creature.type);
+                    ctx.beginPath();
+                    ctx.arc((canvas.width/2) + creature.x * zoom + pos[0] * zoom, (canvas.height/2) + creature.y * zoom + pos[1] * zoom, Math.max(zoom/2, 5), 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
                 ctx.fillStyle = '#fff';
                 ctx.font = '20px monospace';
                 ctx.fillText(`Zoom: ${zoom.toFixed(2)}`, 10, 30);
@@ -217,7 +236,8 @@
                 ctx.fillText(`Regions: ${world.regions.length}`, 10, 120);
                 ctx.fillText(`Resource: ${world.resources.length}`, 10, 150);
                 ctx.fillText(`Creatures: ${world.creatures.length}`, 10, 180);
-                ctx.fillText(`Projectiles: ${world.projectiles.length}`, 10, 210);
+                ctx.fillText(`Structures: ${world.structures.length}`, 10, 210);
+                ctx.fillText(`Projectiles: ${world.projectiles.length}`, 10, 240);
                 requestAnimationFrame(render);
             }
             render()
@@ -297,6 +317,9 @@
                     break;
                 case 'oak_tree':
                     color = '#1c1';
+                    break;
+                case 'player':
+                    color = '#ff0';
                     break;
             }
             return color;

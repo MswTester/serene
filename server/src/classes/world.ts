@@ -72,6 +72,7 @@ export default class World{
         if(this.time % this.spawnTick == 0){
             this.spawn();
         }
+        this.emit('tick')
     }
 
     spawn(multiplier:number = 1){
@@ -109,7 +110,7 @@ export default class World{
                 }
             });
         });
-        this.emit('spawn', spawnResources, spawnCreatures);
+        // this.emit('spawn', spawnResources, spawnCreatures);
     }
 
     addCreature(creature:Creature){

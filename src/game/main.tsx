@@ -1,4 +1,4 @@
-import { Stage, Container, Graphics } from '@pixi/react';
+import { Stage, Container, Graphics, Sprite } from '@pixi/react';
 import * as PIXI from 'pixi.js';
 import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useInterval, useWindowSize } from 'usehooks-ts';
@@ -18,12 +18,14 @@ import { createRegion } from '../../server/src/classes/creation/createRegion';
 import Player from '../../server/src/classes/creatures/others/player';
 
 const globalConfig = {
-    tileSize:70,
+    Scaling:100,
+    tileScaling:100,
 }
 
 export default function Index() {
     const { width, height } = useWindowSize();
     const { lang, user, socket, setSocket, setPage } = useContext(globalContext);
+    const [screenScale, setScreenScale] = useState(Math.max(width / 1920, height / 1080));
     // Server variables
     const [resources, setResources] = useState<Resource[]>([]);
     const [creatures, setCreatures] = useState<Creature[]>([]);
@@ -41,7 +43,8 @@ export default function Index() {
     const [filter, setFilter] = useState<PIXI.Filter[]>([]);
     const [viewport, setViewport] = useState<Point>([0, 0]);
     const [zoom, setZoom] = useState<number>(1);
-    // const app = useApp();
+    const [rotation, setRotation] = useState<number>(0);
+    const [keyMap, setKeyMap] = useState<string[]>([]);
 
     useEffect(() => {
         setOnce(true);
@@ -88,7 +91,7 @@ export default function Index() {
 
             setGamePage('game');
 
-            socket.on('tickUpdate', (data:{
+            socket.on('tick', (data:{
                 time:number;
                 weather:number;
             }) => {
@@ -100,9 +103,45 @@ export default function Index() {
         return () => {
             socket.off('kick');
             socket.off('init');
-            socket.off('tickUpdate');
+            socket.off('tick');
         }
     }, [once]);
+
+    useEffect(() => {
+        const keyDown = (e:KeyboardEvent) => {
+            setKeyMap([...keyMap, e.code]);
+        }
+        const keyUp = (e:KeyboardEvent) => {
+            setKeyMap(keyMap.filter(v => v !== e.code));
+        }
+        document.addEventListener('keydown', keyDown);
+        document.addEventListener('keyup', keyUp);
+        return () => {
+            document.removeEventListener('keydown', keyDown);
+            document.removeEventListener('keyup', keyUp);
+        }
+    }, [keyMap]);
+
+    useInterval(() => {
+        if(!socket) return;
+        if(!me) return;
+        if(!once) return;
+        setScreenScale(Math.max(width / 1920, height / 1080));
+        setViewport([me.x, me.y]);
+        setMe(me => {
+            me = (me as Player)
+            let speed = me.baseSpeed[0]/40
+            if(keyMap.includes('KeyW')) me.dy = -speed;
+            else if(keyMap.includes('KeyS')) me.dy = speed;
+            else me.dy = 0;
+            if(keyMap.includes('KeyA')) me.dx = -speed;
+            else if(keyMap.includes('KeyD')) me.dx = speed;
+            else me.dx = 0;
+            me.update();
+            return me;
+        })
+        socket.emit('tick', me.getSaveFormat())
+    }, 1000 / 60);
 
     const createTexturedPolygon = (graphics:PIXI.Graphics, texture:PIXI.Texture, points:Point[]) => {
         const polygon = points.map(([x, y]) => new PIXI.Point(x, y));
@@ -118,24 +157,65 @@ export default function Index() {
 
         gamePage === 'game' ? <>
             <Stage width={width} height={height}>
-                <Container pivot={[0.5/width, 0.5/height]} scale={zoom}>
+                <Container pivot={[viewport[0]*globalConfig.Scaling*screenScale - width/2, viewport[1]*globalConfig.Scaling*screenScale - height/2]}
+                scale={zoom} rotation={rotation} anchor={0.5}>
                     <Graphics draw={graphics => {
                         graphics.clear();
                         regions.forEach(region => {
-                            // const texture = Texture.from(`assets/${region.src}.png`);
-                            const texture = PIXI.Texture.from(`assets/regions/test.png`);
-                            texture.baseTexture.setSize(globalConfig.tileSize*zoom, globalConfig.tileSize*zoom);
-                            const polygon = sizingPolygon(region.polygon, 0.1)
+                            const texture = PIXI.Texture.from(`assets/${region.src}.png`);
+                            texture.baseTexture.setSize(globalConfig.tileScaling*screenScale, globalConfig.tileScaling*screenScale);
+                            const polygon = sizingPolygon(region.polygon, globalConfig.Scaling*screenScale)
                             createTexturedPolygon(graphics, texture, polygon);
                         });
                     }} />
+                    {resources.sort((a, b) => a.y - b.y).map(v => {
+                        return <Sprite source={`assets/${v.src}.png`}
+                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
+                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
+                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
+                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
+                        ></Sprite>
+                    })}
+                    {creatures.sort((a, b) => a.y - b.y).map(v => {
+                        return <Sprite source={`assets/${v.src}-${v.direction}-${v.state}.png`}
+                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
+                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
+                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
+                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
+                        ></Sprite>
+                    })}
+                    {vehicles.sort((a, b) => a.y - b.y).map(v => {
+                        return <Sprite source={`assets/${v.src}-${v.direction}.png`}
+                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
+                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
+                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
+                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
+                        ></Sprite>
+                    })}
+                    {structures.sort((a, b) => a.y - b.y).map(v => {
+                        return <Sprite source={`assets/${v.src}.png`}
+                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
+                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
+                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
+                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
+                        ></Sprite>
+                    })}
+                    {projectiles.sort((a, b) => a.y - b.y).map(v => {
+                        return <Sprite source={`assets/${v.src}.png`}
+                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
+                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
+                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
+                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
+                        rotation={v.rotation/180*Math.PI}
+                        ></Sprite>
+                    })}
                 </Container>
             </Stage>
             <div className='absolute left-0 top-0 bg-[#00000055] rounded-md text-white'>
                 <input type="number" name="" id="" className='bg-transparent border border-white border-1 focus:outline-none' value={zoom} onChange={e => setZoom(+e.target.value)} />
-                <input type="number" name="" id="" className='bg-transparent border border-white border-1 focus:outline-none' value={viewport[0]} onChange={e => setViewport([+e.target.value, viewport[1]])} />
-                <input type="number" name="" id="" className='bg-transparent border border-white border-1 focus:outline-none' value={viewport[1]} onChange={e => setViewport([viewport[0], +e.target.value])} />
+                <input type="number" name="" id="" className='bg-transparent border border-white border-1 focus:outline-none' value={rotation} onChange={e => setRotation(+e.target.value)} />
                 <br />
+                {screenScale}
             </div>
         </>:
         <></>

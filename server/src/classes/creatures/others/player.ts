@@ -34,10 +34,11 @@ export default class Player extends Creature {
             Player.defaultBaseFood,
             Player.defaultBaseSpeed,
             Player.defaultDrops,
+            x, y,
             Player.defaultWidth,
             Player.defaultHeight,
             lvl, exp,
-            x, y, dx, dy, direction,
+            dx, dy, direction,
             uuid, state, health, food,
             inventory != undefined ? Inventory.toInventory(inventory) : new Inventory(40),
             false, '', ''
@@ -66,5 +67,17 @@ export default class Player extends Creature {
             guildId: this.guildId,
             name: this.name,
         }
+    }
+
+    update() {
+        this.x += this.dx;
+        this.y += this.dy;
+    }
+
+    tickUpdate(x:number, y:number, dx:number, dy:number){
+        this.x = x;
+        this.y = y;
+        this.dx = dx;
+        this.dy = dy;
     }
 }
