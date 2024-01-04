@@ -1,5 +1,5 @@
-import { Stage, Container, useApp } from '@pixi/react';
-import PIXI, { Filter } from 'pixi.js';
+import { Stage, Container, Graphics } from '@pixi/react';
+import * as PIXI from 'pixi.js';
 import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useInterval, useWindowSize } from 'usehooks-ts';
 import { globalContext } from '../App';
@@ -16,6 +16,10 @@ import { createStructure } from '../../server/src/classes/creation/createStructu
 import { createVehicle } from '../../server/src/classes/creation/createVehicle';
 import { createRegion } from '../../server/src/classes/creation/createRegion';
 import Player from '../../server/src/classes/creatures/others/player';
+
+const globalConfig = {
+    tileSize:70,
+}
 
 export default function Index() {
     const { width, height } = useWindowSize();
@@ -34,9 +38,10 @@ export default function Index() {
     const [once, setOnce] = useState(false);
     const [me, setMe] = useState<Player>();
     const [gamePage, setGamePage] = useState<string>('loading');
-    const [filter, setFilter] = useState<Filter[]>([]);
+    const [filter, setFilter] = useState<PIXI.Filter[]>([]);
     const [viewport, setViewport] = useState<Point>([0, 0]);
     const [zoom, setZoom] = useState<number>(1);
+    // const app = useApp();
 
     useEffect(() => {
         setOnce(true);
@@ -99,36 +104,11 @@ export default function Index() {
         }
     }, [once]);
 
-    useInterval(() => {
-        if(!socket) return;
-        if(!user) return;
-        if(!once) return;
-        // render
-    }, 1000 / 60);
-
-    const PolygonWithTexture: React.FC<{points:Polygon, texture:PIXI.Texture, scale:number}> = ({ points, texture, scale }) => {
-        const app = useApp();
-        const graphics = new PIXI.Graphics();
-      
-        useEffect(() => {
-            // PixiJS의 drawPolygon은 flat한 배열을 받기 때문에 2차원 배열을 flat하게 변환
-            const flatPoints = points.flat();
-
-            texture.baseTexture.setSize(scale, scale); // 텍스쳐 스케일 조절
-
-            graphics.clear();
-            graphics.beginTextureFill({ texture: texture });
-            graphics.drawPolygon(flatPoints as any); // 타입 캐스팅
-            graphics.endFill();
-
-            app.stage.addChild(graphics);
-
-            return () => {
-                app.stage.removeChild(graphics);
-            };
-        }, [points, texture, scale, app.stage, graphics]); // scale 의존성 추가
-
-        return null;
+    const createTexturedPolygon = (graphics:PIXI.Graphics, texture:PIXI.Texture, points:Point[]) => {
+        const polygon = points.map(([x, y]) => new PIXI.Point(x, y));
+        graphics.beginTextureFill({ texture });
+        graphics.drawPolygon(polygon);
+        graphics.endFill();
     };
 
     return <>
@@ -136,12 +116,33 @@ export default function Index() {
             <div className="text-white text-4xl">Loading...</div>
         </div>:
 
-        gamePage === 'game' ? <Stage width={width} height={height}>
-            <Container pivot={[0.5/width, 0.5/height]}>
-                
-            </Container>
-        </Stage>:
+        gamePage === 'game' ? <>
+            <Stage width={width} height={height}>
+                <Container pivot={[0.5/width, 0.5/height]} scale={zoom}>
+                    <Graphics draw={graphics => {
+                        graphics.clear();
+                        regions.forEach(region => {
+                            // const texture = Texture.from(`assets/${region.src}.png`);
+                            const texture = PIXI.Texture.from(`assets/regions/test.png`);
+                            texture.baseTexture.setSize(globalConfig.tileSize*zoom, globalConfig.tileSize*zoom);
+                            const polygon = sizingPolygon(region.polygon, 0.1)
+                            createTexturedPolygon(graphics, texture, polygon);
+                        });
+                    }} />
+                </Container>
+            </Stage>
+            <div className='absolute left-0 top-0 bg-[#00000055] rounded-md text-white'>
+                <input type="number" name="" id="" className='bg-transparent border border-white border-1 focus:outline-none' value={zoom} onChange={e => setZoom(+e.target.value)} />
+                <input type="number" name="" id="" className='bg-transparent border border-white border-1 focus:outline-none' value={viewport[0]} onChange={e => setViewport([+e.target.value, viewport[1]])} />
+                <input type="number" name="" id="" className='bg-transparent border border-white border-1 focus:outline-none' value={viewport[1]} onChange={e => setViewport([viewport[0], +e.target.value])} />
+                <br />
+            </div>
+        </>:
         <></>
         }
     </>
+}
+
+const sizingPolygon = (polygon:Point[], size:number):Point[] => {
+    return polygon.map((v) => [v[0]*size, v[1]*size]);
 }

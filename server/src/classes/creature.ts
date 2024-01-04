@@ -1,6 +1,13 @@
 import { generateUUID, EventEmitter } from "./utils";
 import Inventory from "./systems/inventory";
 
+enum Direction{
+    Up = 'up',
+    Down = 'down',
+    Left = 'left',
+    Rigt = 'right',
+}
+
 export default class Creature {
     readonly type: CreatureType;
     readonly name: string;
