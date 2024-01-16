@@ -1,5 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {createContext, useState, useEffect} from 'react';
-import { Auth, User } from 'firebase/auth';
+import { User } from 'firebase/auth';
 import { Socket } from 'socket.io-client';
 import './styles/global.css'
 
@@ -22,10 +24,10 @@ function App() {
     if(localStorage.getItem("lang")){
       setLang(localStorage.getItem("lang")!)
     }else{
-      let adl = navigator.language.split("-")[0]
+      const adl = navigator.language.split("-")[0]
       localStorage.setItem("lang", adl)
       setLang(adl)
-    };
+    }
   }, []);
   
   return (hydrated ? <globalContext.Provider value={{
