@@ -24,6 +24,8 @@ export default class ServerLogic {
     socket:Server;
     chat: string[] = [];
     users: User[] = [];
+
+    // tick event updater
     updater:{[key:string]:any}[] = [];
     remove:string[] = [];
     add:string[] = [];
@@ -129,7 +131,6 @@ export default class ServerLogic {
                     socket.emit('chat', message);
                     socket.broadcast.emit('chat', message);
                 });
-
 
                 this.world.on('spawn', (resources:[], creatures:[]) => {
                     socket.emit('spawn', [resources, creatures]);
