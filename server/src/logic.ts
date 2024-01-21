@@ -141,6 +141,8 @@ export default class ServerLogic {
 
                 this.on('tick', (updater:{[key:string]:any}[], add:string[], remove:string[]) => {
                     socket.emit('updater', updater)
+                    socket.emit('add', add)
+                    socket.emit('remove', remove)
                 })
             })
 
