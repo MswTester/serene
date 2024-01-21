@@ -45,6 +45,7 @@ export default function Index() {
     const [zoom, setZoom] = useState<number>(1);
     const [rotation, setRotation] = useState<number>(0);
     const [keyMap, setKeyMap] = useState<string[]>([]);
+    const [renders, setRenders] = useState<(Creature)[]>([]);
 
     useEffect(() => {
         setOnce(true);
