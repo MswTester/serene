@@ -9,22 +9,22 @@ enum Direction{
 }
 
 export default class Creature {
-    readonly type: CreatureType;
-    readonly name: string;
+    type: CreatureType;
+    name: string;
 
-    readonly src: string;
-    readonly offsetWidth: number;
-    readonly offsetHeight: number;
+    src: string;
+    offsetWidth: number;
+    offsetHeight: number;
 
-    readonly stateTypes: string[];
+    stateTypes: string[];
 
-    readonly baseHealth: number;
-    readonly baseDamage: number[];
-    readonly baseDefense: number;
-    readonly baseFood: number;
-    readonly baseSpeed: number[];
+    baseHealth: number;
+    baseDamage: number[];
+    baseDefense: number;
+    baseFood: number;
+    baseSpeed: number[];
 
-    readonly drops: ItemDrop[];
+    drops: ItemDrop[];
 
     uuid: string;
     events: EventEmitter;
@@ -125,6 +125,24 @@ export default class Creature {
             ownerGuildId: this.ownerGuildId,
         }
     }
+
+    update(saveform:CreatureSaveFormat){
+        this.type = saveform.type
+        this.x = saveform.x
+        this.y = saveform.y
+        this.dx = saveform.dx
+        this.dy = saveform.dy
+        this.direction = saveform.direction
+        this.level = saveform.level
+        this.exp = saveform.exp
+        this.state = saveform.state
+        this.health = saveform.health
+        this.food = saveform.food
+        this.isTamed = saveform.isTamed
+        this.inventory = Inventory.toInventory(saveform.inventory)
+        this.ownerId = saveform.ownerId
+        this.ownerGuildId = saveform.ownerGuildId
+    }
 }
 
 export interface CreatureSaveFormat {
@@ -207,4 +225,5 @@ export enum CreatureType {
 
     // Others
     Player = 'player',
+    Custom = 'custom',
 }

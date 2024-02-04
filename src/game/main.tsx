@@ -67,6 +67,7 @@ export default function Index() {
             setPage('menu')
         });
 
+        // connection init
         socket.on('init', (data:{
             player:CreatureSaveFormat;
             resources:ResourceSaveFormat[];
@@ -76,20 +77,21 @@ export default function Index() {
             vehicles:VehicleSaveFormat[];
             regions:RegionSaveFormat[];
         }) => {
-            let resources = data.resources.map(v => createResource(v.type, v.x, v.y, v.uuid, v.health))
-            let creatures = data.creatures.filter(v => v.uuid !== data.player.uuid).map(v => createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId, v.guildId, v.name))
-            let projectiles = data.projectiles.map(v => createProjectile(v.type, v.x, v.y, v.dx, v.dy, v.rotation, v.ownerId, v.damageMultiplier, v.uuid))
-            let structures = data.structures.map(v => createStructure(v.type, v.x, v.y, v.ownerId, v.ownerGuildId, v.uuid, v.health))
-            let vehicles = data.vehicles.map(v => createVehicle(v.type, v.x, v.y, v.ownerId, v.ownerGuildId, v.uuid, v.health, v.fuel))
-            let regions = data.regions.map(v => createRegion(v.type, v.polygon))
-            setResources(resources);
-            setCreatures(creatures);
-            setProjectiles(projectiles);
-            setStructures(structures);
-            setVehicles(vehicles);
-            setRegions(regions);
+            let vresources = data.resources.map(v => createResource(v.type, v.x, v.y, v.uuid, v.health))
+            let vcreatures = data.creatures.filter(v => v.uuid !== data.player.uuid).map(v => createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId, v.guildId, v.name))
+            let vprojectiles = data.projectiles.map(v => createProjectile(v.type, v.x, v.y, v.dx, v.dy, v.rotation, v.ownerId, v.damageMultiplier, v.uuid))
+            let vstructures = data.structures.map(v => createStructure(v.type, v.x, v.y, v.ownerId, v.ownerGuildId, v.uuid, v.health))
+            let vvehicles = data.vehicles.map(v => createVehicle(v.type, v.x, v.y, v.ownerId, v.ownerGuildId, v.uuid, v.health, v.fuel))
+            let vregions = data.regions.map(v => createRegion(v.type, v.polygon))
+            setResources(vresources);
+            setCreatures(vcreatures);
+            setProjectiles(vprojectiles);
+            setStructures(vstructures);
+            setVehicles(vvehicles);
+            setRegions(vregions);
             setMe(new Player(data.player.x, data.player.y, data.player.level, data.player.exp, data.player.name, data.player.uuid, data.player.dx, data.player.dy, data.player.direction, data.player.state, data.player.health, data.player.food, data.player.inventory, data.player.guildId));
 
+            // init on join server
             setGamePage('game');
 
             socket.on('tick', (data:{
@@ -99,6 +101,32 @@ export default function Index() {
                 setTime(data.time);
                 setWeather(data.weather);
             });
+
+            socket.on('chat', (data:string) => {
+                setChat(chat => [...chat, data]);
+            })
+
+            socket.on('update', (data:{updater:{[key:string]:any}[], add:string[], remove:string[]}) => {
+                data.updater.forEach(v => {
+                    if(v.uuid === (me as Player).uuid) return;
+                    let creature = creatures.find(c => c.uuid === v.uuid);
+                    if(creature) {
+                        // update all properties
+                    }
+                    let resource = resources.find(r => r.uuid === v.uuid)
+                    if(resource){
+                    }
+                });
+                data.add.forEach(v => {
+                    let creature = creatures.find(c => c.uuid === v);
+                });
+                data.remove.forEach(v => {
+                    let creature = creatures.find(c => c.uuid === v);
+                    if(creature) {
+                        creatures.splice(creatures.indexOf(creature), 1);
+                    }
+                });
+            })
         });
 
         return () => {
@@ -169,47 +197,14 @@ export default function Index() {
                             createTexturedPolygon(graphics, texture, polygon);
                         });
                     }} />
-                    {resources.sort((a, b) => a.y - b.y).map(v => {
+                    {/* {resources.sort((a, b) => a.y - b.y).map(v => {
                         return <Sprite source={`assets/${v.src}.png`}
                         width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
                         height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
                         position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
                         anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
                         ></Sprite>
-                    })}
-                    {creatures.sort((a, b) => a.y - b.y).map(v => {
-                        return <Sprite source={`assets/${v.src}-${v.direction}-${v.state}.png`}
-                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
-                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
-                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
-                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
-                        ></Sprite>
-                    })}
-                    {vehicles.sort((a, b) => a.y - b.y).map(v => {
-                        return <Sprite source={`assets/${v.src}-${v.direction}.png`}
-                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
-                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
-                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
-                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
-                        ></Sprite>
-                    })}
-                    {structures.sort((a, b) => a.y - b.y).map(v => {
-                        return <Sprite source={`assets/${v.src}.png`}
-                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
-                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
-                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
-                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
-                        ></Sprite>
-                    })}
-                    {projectiles.sort((a, b) => a.y - b.y).map(v => {
-                        return <Sprite source={`assets/${v.src}.png`}
-                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
-                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
-                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
-                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
-                        rotation={v.rotation/180*Math.PI}
-                        ></Sprite>
-                    })}
+                    })} */}
                 </Container>
             </Stage>
             <div className='absolute left-0 top-0 bg-[#00000055] rounded-md text-white'>

@@ -190,11 +190,30 @@
                 world.creatures.push(data)
             })
 
-            socket.on('updater', (data) => {
-                data.forEach(v => {
+            socket.on('update', (data) => {
+                data.updater.forEach(v => {
+                    world.resources[world.resources.findIndex(vv => vv.uuid == v.uuid)] = v
                     world.creatures[world.creatures.findIndex(vv => vv.uuid == v.uuid)] = v
-                    console.log(v)
-                    // world.creatures.find(vv => v.uuid == vv.uuid) = v
+                    world.projectiles[world.projectiles.findIndex(vv => vv.uuid == v.uuid)] = v
+                    world.structures[world.structures.findIndex(vv => vv.uuid == v.uuid)] = v
+                    world.vehicles[world.vehicles.findIndex(vv => vv.uuid == v.uuid)] = v
+                    world.regions[world.regions.findIndex(vv => vv.uuid == v.uuid)] = v
+                })
+                data.add.forEach(v => {
+                    world.resources = [...world.resources, v]
+                    world.creatures = [...world.creatures, v]
+                    world.projectiles = [...world.projectiles, v]
+                    world.structures = [...world.structures, v]
+                    world.vehicles = [...world.vehicles, v]
+                    world.regions = [...world.regions, v]
+                })
+                data.remove.forEach(v => {
+                    world.resources = world.resources.filter(f => f.id != v)
+                    world.creatures = world.creatures.filter(f => f.id != v)
+                    world.projectiles = world.projectiles.filter(f => f.id != v)
+                    world.structures = world.structures.filter(f => f.id != v)
+                    world.vehicles = world.vehicles.filter(f => f.id != v)
+                    world.regions = world.regions.filter(f => f.id != v)
                 })
             })
 

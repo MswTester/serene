@@ -13,6 +13,7 @@ export const createCreature = (type:CreatureType, x:number, y:number, level:numb
             return new Chilia(x, y, level, exp, uuid, dx, dy, direction, state, health, food, inventory, isTamed, ownerId, ownerGuildId);
         case CreatureType.Player:
             return new Player(x, y, level, exp, name, uuid, dx, dy, direction, state, health, food, inventory, guildId);
+        case CreatureType.Custom:
         default:
             throw new Error('Invalid creature type.');
     }

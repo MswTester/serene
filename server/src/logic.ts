@@ -5,6 +5,7 @@ import User from "./user";
 import Player from "./classes/creatures/others/player";
 import Creature, { CreatureSaveFormat } from "./classes/creature";
 import { EventEmitter, isInChunk } from "./classes/utils";
+import { ItemType } from "./classes/item";
 
 interface ServerConfig{
     name: string;
@@ -28,7 +29,7 @@ export default class ServerLogic {
     // tick event updater
     updater:{[key:string]:any}[] = [];
     remove:string[] = [];
-    add:string[] = [];
+    add:{[key:string]:any}[] = [];
 
     // server data
     bannedID: string[] = [];
@@ -105,15 +106,21 @@ export default class ServerLogic {
                     socket.broadcast.emit('chat', message);
                 });
 
+                // player movement tick
                 socket.on('tick', (player:CreatureSaveFormat) => {
                     let curPlayer = (this.world.getWorldObjects().creatures.find(v => v.uuid == player.uuid) as Player)
                     curPlayer.tickUpdate(player.x, player.y, player.dx, player.dy)
                     this.addUpdater(curPlayer.getSaveFormat())
                 })
 
-                this.on('tick', (updater:{[key:string]:any}[], add:string[], remove:string[]) => {
+                // server updation tick
+                this.on('tick', (updater:{[key:string]:any}[], add:{[key:string]:any}[], remove:string[]) => {
                     let myChar = this.world.getWorldObjects().creatures.find(v => v.uuid == data.uuid) as Player
-                    socket.emit('updater', updater.filter((v) => isInChunk(myChar.x, myChar.y, v.x, v.y, 32, 1)))
+                    socket.emit('update', {
+                        updater:updater.filter((v) => isInChunk(myChar.x, myChar.y, v.x, v.y, 32, 1)),
+                        add:add.filter((v) => isInChunk(myChar.x, myChar.y, v.x, v.y, 32, 1)),
+                        remove
+                    })
                 })
             });
 
@@ -140,10 +147,8 @@ export default class ServerLogic {
                     socket.emit('creatureSpawn', creature.getSaveFormat())
                 })
 
-                this.on('tick', (updater:{[key:string]:any}[], add:string[], remove:string[]) => {
-                    socket.emit('updater', updater)
-                    socket.emit('add', add)
-                    socket.emit('remove', remove)
+                this.on('tick', (updater:{[key:string]:any}[], add:{[key:string]:any}[], remove:string[]) => {
+                    socket.emit('update', {updater, add, remove})
                 })
             })
 
@@ -224,6 +229,13 @@ export default class ServerLogic {
                 } else {
                     return 'Creature not found!';
                 }
+            case '/item':
+                let target6:string = args[1];
+                if((Object.values(ItemType) as string[]).includes(target6)){
+                    // item give
+                } else {
+                    return 'ItemType not found!';
+                }
             default:
                 return 'Unknown command';
         }
@@ -252,6 +264,14 @@ export default class ServerLogic {
 
     addUpdater(data:{[key:string]:any}){
         this.updater = [...this.updater.filter(v => v.uuid !== data.uuid), data]
+    }
+
+    addAdder(data:{[key:string]:any}){
+        this.add = [...this.add.filter(v => v.uuid !== data.uuid), data]
+    }
+
+    addRemover(data:string){
+        this.remove = [...this.remove, data]
     }
 
     on(event:string, callback:(...args: any[]) => void){
