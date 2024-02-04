@@ -7,7 +7,7 @@ export default class Player extends Creature {
     static defaultName:string = 'Player';
     static defaultSrc:string = 'creatures/others/player';
     static defaultOffsetWidth:number = 1;
-    static defaultOffsetHeight:number = 1;
+    static defaultOffsetHeight:number = 1.5;
     static defaultStateTypes:string[] = ['idle', 'walk', 'run', 'attack', 'dead'];
     static defaultBaseHealth:number = 100;
     static defaultBaseDamage:number[] = [5];
@@ -16,7 +16,7 @@ export default class Player extends Creature {
     static defaultBaseSpeed:number[] = [1];
     static defaultDrops:ItemDrop[] = [];
     static defaultWidth:number = 1;
-    static defaultHeight:number = 1.5;
+    static defaultHeight:number = 1;
 
     readonly guildId:string;
 

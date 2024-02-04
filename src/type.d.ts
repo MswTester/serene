@@ -29,3 +29,13 @@ interface fetchedServer{
 
 type Point = [number, number];
 type Polygon = Point[];
+
+interface RenderObject{
+    src:string;
+    x:number;
+    y:number;
+    oWidth:number;
+    oHeight:number;
+    width:number;
+    height:number;
+}

@@ -16,7 +16,6 @@ import { createStructure } from '../../server/src/classes/creation/createStructu
 import { createVehicle } from '../../server/src/classes/creation/createVehicle';
 import { createRegion } from '../../server/src/classes/creation/createRegion';
 import Player from '../../server/src/classes/creatures/others/player';
-import RenderObject from './render';
 
 const globalConfig = {
     Scaling:100,
@@ -140,7 +139,14 @@ export default function Index() {
 
     // render updation         
     useEffect(() => {
-
+        let rdo:RenderObject[] = []
+        resources.forEach(v => {rdo.push({src:`assets/${v.src}`, x:v.x, y:v.y, oWidth:v.offsetWidth, oHeight:v.offsetHeight, width:v.width, height:v.height})})
+        creatures.forEach(v => {rdo.push({src:`assets/${v.src}_${v.state}`, x:v.x, y:v.y, oWidth:v.offsetWidth, oHeight:v.offsetHeight, width:v.width, height:v.height})})
+        projectiles.forEach(v => {rdo.push({src:`assets/${v.src}`, x:v.x, y:v.y, oWidth:v.offsetWidth, oHeight:v.offsetHeight, width:v.width, height:v.height})})
+        structures.forEach(v => {rdo.push({src:`assets/${v.src}`, x:v.x, y:v.y, oWidth:v.offsetWidth, oHeight:v.offsetHeight, width:v.width, height:v.height})})
+        vehicles.forEach(v => {rdo.push({src:`assets/${v.src}`, x:v.x, y:v.y, oWidth:v.offsetWidth, oHeight:v.offsetHeight, width:v.width, height:v.height})})
+        rdo = rdo.sort((a, b) => a.y - b.y)
+        setRenders(rdo)
     }, [me, resources, creatures, projectiles, structures, vehicles])
 
     useEffect(() => {
@@ -163,7 +169,7 @@ export default function Index() {
         if(!me) return;
         if(!once) return;
         setScreenScale(Math.max(width / 1920, height / 1080));
-        setViewport([me.x, me.y]);
+        setViewport([me.x - (me.x - viewport[0])/2, viewport[1] + (me.y - viewport[1])/2]);
         setMe(me => {
             me = (me as Player)
             let speed = me.baseSpeed[0]/40
@@ -204,14 +210,15 @@ export default function Index() {
                             createTexturedPolygon(graphics, texture, polygon);
                         });
                     }} />
-                    {/* {resources.sort((a, b) => a.y - b.y).map(v => {
-                        return <Sprite source={`assets/${v.src}.png`}
-                        width={v.width*v.offsetWidth*globalConfig.Scaling*screenScale}
-                        height={v.height*v.offsetHeight*globalConfig.Scaling*screenScale}
-                        position={[v.x*globalConfig.Scaling*screenScale, v.y*globalConfig.Scaling*screenScale]}
-                        anchor={[0.5, (2*v.offsetHeight-1)/(2*v.offsetHeight)]}
+                    {renders.map((v, i) => {
+                        return <Sprite
+                            source={v.src}
+                            width={v.width * v.oWidth * globalConfig.Scaling * screenScale}
+                            height={v.height * v.oHeight * globalConfig.Scaling * screenScale}
+                            position={[v.x * globalConfig.Scaling * screenScale, v.y * globalConfig.Scaling * screenScale]}
+                            anchor={[0.5, (2*v.oHeight-1)/(2*v.oHeight)]}
                         ></Sprite>
-                    })} */}
+                    })}
                 </Container>
             </Stage>
             <div className='absolute left-0 top-0 bg-[#00000055] rounded-md text-white'>

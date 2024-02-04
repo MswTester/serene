@@ -15,8 +15,8 @@ export default class Chilia extends Creature {
     static defaultBaseFood:number = 20;
     static defaultBaseSpeed:number[] = [0.1, 0.2];
     static defaultDrops:ItemDrop[] = [];
-    static defaultWidth:number = 0.5;
-    static defaultHeight:number = 0.5;
+    static defaultWidth:number = 1;
+    static defaultHeight:number = 0.8;
 
     constructor(x:number, y:number, lvl:number, exp:number, uuid?:string, dx?:number, dy?:number, direction?:Direction, state?:string, health?:number, food?:number, inventory?:(ItemSaveFormat|null)[], isTamed?:boolean, ownerId?:string, ownerGuildId?:string) {
         super(
