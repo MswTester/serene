@@ -233,6 +233,7 @@ export default class ServerLogic {
                 let target6:string = args[1];
                 if((Object.values(ItemType) as string[]).includes(target6)){
                     // item give
+                    return 'Successfully given!'
                 } else {
                     return 'ItemType not found!';
                 }

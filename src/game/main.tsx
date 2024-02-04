@@ -16,6 +16,7 @@ import { createStructure } from '../../server/src/classes/creation/createStructu
 import { createVehicle } from '../../server/src/classes/creation/createVehicle';
 import { createRegion } from '../../server/src/classes/creation/createRegion';
 import Player from '../../server/src/classes/creatures/others/player';
+import RenderObject from './render';
 
 const globalConfig = {
     Scaling:100,
@@ -45,7 +46,7 @@ export default function Index() {
     const [zoom, setZoom] = useState<number>(1);
     const [rotation, setRotation] = useState<number>(0);
     const [keyMap, setKeyMap] = useState<string[]>([]);
-    const [renders, setRenders] = useState<(Creature)[]>([]);
+    const [renders, setRenders] = useState<RenderObject[]>([]);
 
     useEffect(() => {
         setOnce(true);
@@ -111,30 +112,36 @@ export default function Index() {
                     if(v.uuid === (me as Player).uuid) return;
                     let creature = creatures.find(c => c.uuid === v.uuid);
                     if(creature) {
-                        // update all properties
+                        creature.update(v as CreatureSaveFormat)
                     }
-                    let resource = resources.find(r => r.uuid === v.uuid)
-                    if(resource){
-                    }
+                    // need to write resources, structures, etc ...
                 });
                 data.add.forEach(v => {
-                    let creature = creatures.find(c => c.uuid === v);
+                    // creation
                 });
                 data.remove.forEach(v => {
                     let creature = creatures.find(c => c.uuid === v);
                     if(creature) {
                         creatures.splice(creatures.indexOf(creature), 1);
                     }
+                    // need to write resources, structures, etc ...
                 });
             })
         });
 
         return () => {
+            // remove socket listener
             socket.off('kick');
             socket.off('init');
             socket.off('tick');
+            socket.off('update')
         }
     }, [once]);
+
+    // render updation         
+    useEffect(() => {
+
+    }, [me, resources, creatures, projectiles, structures, vehicles])
 
     useEffect(() => {
         const keyDown = (e:KeyboardEvent) => {

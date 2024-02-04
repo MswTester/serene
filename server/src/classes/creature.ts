@@ -225,5 +225,6 @@ export enum CreatureType {
 
     // Others
     Player = 'player',
+    Item = 'item',
     Custom = 'custom',
 }
