@@ -210,7 +210,7 @@ export default function Index() {
                             createTexturedPolygon(graphics, texture, polygon);
                         });
                     }} />
-                    {renders.map((v, i) => {
+                    {renders.sort((a, b) => b.y - a.y).map((v, i) => {
                         return <Sprite
                             source={v.src}
                             width={v.width * v.oWidth * globalConfig.Scaling * screenScale}
