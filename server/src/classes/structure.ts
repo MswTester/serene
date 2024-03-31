@@ -1,4 +1,5 @@
 import { generateUUID, EventEmitter } from "./utils";
+import World from "./world";
 
 export default class Structure{
     readonly type:StructureType;
@@ -67,6 +68,10 @@ export default class Structure{
             ownerId: this.ownerId,
             ownerGuildId: this.ownerGuildId
         }
+    }
+
+    tick(world:World){
+        
     }
 }
 

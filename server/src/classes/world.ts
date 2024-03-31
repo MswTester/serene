@@ -72,6 +72,21 @@ export default class World{
         if(this.time % this.spawnTick == 0){
             this.spawn();
         }
+        this.resources.forEach((resource) => {
+            resource.tick(this);
+        });
+        this.structures.forEach((structure) => {
+            structure.tick(this);
+        });
+        this.creatures.forEach((creature) => {
+            creature.tick(this);
+        });
+        this.projectiles.forEach((projectile) => {
+            projectile.tick(this);
+        });
+        this.vehicles.forEach((vehicle) => {
+            vehicle.tick(this);
+        });
         this.emit('tick')
     }
 

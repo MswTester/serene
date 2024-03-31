@@ -1,5 +1,6 @@
 import { generateUUID, EventEmitter } from "./utils";
 import Inventory from "./systems/inventory";
+import World from "./world";
 
 enum Direction{
     Up = 'up',
@@ -142,6 +143,10 @@ export default class Creature {
         this.inventory = Inventory.toInventory(saveform.inventory)
         this.ownerId = saveform.ownerId
         this.ownerGuildId = saveform.ownerGuildId
+    }
+
+    tick(world: World) {
+        // Do nothing
     }
 }
 

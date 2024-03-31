@@ -1,4 +1,5 @@
 import { generateUUID, EventEmitter } from "./utils";
+import World from "./world";
 
 export default class Vehicle{
     readonly type:VehicleType;
@@ -81,6 +82,11 @@ export default class Vehicle{
             ownerId: this.ownerId,
             ownerGuildId: this.ownerGuildId,
         }
+    }
+
+    tick(world:World){
+        this.x += this.dx;
+        this.y += this.dy;
     }
 }
 

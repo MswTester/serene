@@ -1,18 +1,18 @@
 import { generateUUID, EventEmitter } from "./utils";
+import World from "./world";
 
 export default class Projectile{
     readonly type:ProjectileType;
     
-    readonly maxDistance:number;
     readonly damage:number;
-
+    
     readonly src:string;
     readonly offsetWidth:number;
     readonly offsetHeight:number;
-
+    
     uuid:string;
     events:EventEmitter;
-
+    
     x:number;
     y:number;
     dx:number;
@@ -20,7 +20,8 @@ export default class Projectile{
     rotation:number;
     width:number;
     height:number;
-
+    maxDistance:number;
+    
     ownerId:string;
     damageMultiplier:number;
 
@@ -65,6 +66,16 @@ export default class Projectile{
             rotation: this.rotation,
             ownerId: this.ownerId,
             damageMultiplier: this.damageMultiplier,
+        }
+    }
+
+    tick(world:World){
+        this.x += this.dx;
+        this.y += this.dy;
+
+        this.maxDistance -= Math.hypot(this.dx, this.dy);
+        if(this.maxDistance <= 0){
+            this.emit('destroy');
         }
     }
 }

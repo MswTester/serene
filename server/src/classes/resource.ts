@@ -1,5 +1,6 @@
 import { ItemType } from "./item";
 import { generateUUID, EventEmitter } from "./utils";
+import World from "./world";
 
 export default class Resource{
     readonly type:ResourceType;
@@ -62,6 +63,28 @@ export default class Resource{
             y: this.y,
             health: this.health,
         }
+    }
+
+    takeDamage(damage:number){
+        this.health -= damage;
+        if(this.health <= 0){
+            this.emit('destroy');
+        }
+    }
+
+    repair(amount:number){
+        this.health += amount;
+        if(this.health > this.maxHealth){
+            this.health = this.maxHealth;
+        }
+    }
+
+    getHealthPercent(){
+        return this.health / this.maxHealth;
+    }
+
+    tick(world:World){
+        // Do nothing
     }
 }
 
