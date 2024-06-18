@@ -46,6 +46,8 @@ export default function Index() {
     const [rotation, setRotation] = useState<number>(0);
     const [keyMap, setKeyMap] = useState<string[]>([]);
     const [renders, setRenders] = useState<RenderObject[]>([]);
+    const [delta, setDelta] = useState<number>(0);
+    const [lastTime, setLastTime] = useState<number>(Date.now());
 
     useEffect(() => {
         setOnce(true);
@@ -106,7 +108,7 @@ export default function Index() {
                 setChat(chat => [...chat, data]);
             })
 
-            socket.on('update', (data:{updater:{[key:string]:any}[], add:string[], remove:string[]}) => {
+            socket.on('update', (data:{updater:{[key:string]:any}[], add:{[key:string]:any}[], remove:string[]}) => {
                 data.updater.forEach(v => {
                     if(v.uuid === (me as Player).uuid) return;
                     let creature = creatures.find(c => c.uuid === v.uuid);
@@ -117,13 +119,26 @@ export default function Index() {
                 });
                 data.add.forEach(v => {
                     // creation
+                    if(v.type in CreatureType){
+                        creatures.push(createCreature(v.type, v.x, v.y, v.level, v.exp, v.uuid, v.dx, v.dy, v.direction, v.state, v.health, v.food, v.inventory, v.isTamed, v.ownerId, v.ownerGuildId, v.guildId, v.name))
+                    } else if(v.type in Resource){
+                        resources.push(createResource(v.type, v.x, v.y, v.uuid, v.health))
+                    } else if(v.type in Projectile){
+                        projectiles.push(createProjectile(v.type, v.x, v.y, v.dx, v.dy, v.rotation, v.ownerId, v.damageMultiplier, v.uuid))
+                    } else if(v.type in Structure){
+                        structures.push(createStructure(v.type, v.x, v.y, v.ownerId, v.ownerGuildId, v.uuid, v.health))
+                    } else if(v.type in Vehicle){
+                        vehicles.push(createVehicle(v.type, v.x, v.y, v.ownerId, v.ownerGuildId, v.uuid, v.health, v.fuel))
+                    } else if(v.type in Region){
+                        regions.push(createRegion(v.type, v.polygon))
+                    }
                 });
                 data.remove.forEach(v => {
-                    let creature = creatures.find(c => c.uuid === v);
-                    if(creature) {
-                        creatures.splice(creatures.indexOf(creature), 1);
-                    }
-                    // need to write resources, structures, etc ...
+                    if (creatures.find(vv => vv.uuid == v)) creatures.splice(creatures.findIndex(vv => vv.uuid == v), 1);
+                    if (resources.find(vv => vv.uuid == v)) resources.splice(resources.findIndex(vv => vv.uuid == v), 1);
+                    if (projectiles.find(vv => vv.uuid == v)) projectiles.splice(projectiles.findIndex(vv => vv.uuid == v), 1);
+                    if (structures.find(vv => vv.uuid == v)) structures.splice(structures.findIndex(vv => vv.uuid == v), 1);
+                    if (vehicles.find(vv => vv.uuid == v)) vehicles.splice(vehicles.findIndex(vv => vv.uuid == v), 1);
                 });
             })
         });
@@ -168,11 +183,13 @@ export default function Index() {
         if(!socket) return;
         if(!me) return;
         if(!once) return;
+        setDelta(Date.now() - lastTime);
+        setLastTime(Date.now());
         setScreenScale(Math.max(width / 1920, height / 1080));
         setViewport([me.x - (me.x - viewport[0])/2, viewport[1] + (me.y - viewport[1])/2]);
         setMe(me => {
             me = (me as Player)
-            let speed = me.baseSpeed[0]/40
+            let speed = me.baseSpeed[0]/delta;
             if(keyMap.includes('KeyW')) me.dy = -speed;
             else if(keyMap.includes('KeyS')) me.dy = speed;
             else me.dy = 0;
@@ -182,7 +199,7 @@ export default function Index() {
             me.update();
             return me;
         })
-        socket.emit('tick', me.getSaveFormat())
+        socket.emit('tick', {x:me.x, y:me.y, dx:me.dx, dy:me.dy})
     }, 1000 / 60);
 
     const createTexturedPolygon = (graphics:PIXI.Graphics, texture:PIXI.Texture, points:Point[]) => {
@@ -201,7 +218,7 @@ export default function Index() {
             <Stage width={width} height={height}>
                 <Container pivot={[viewport[0]*globalConfig.Scaling*screenScale - width/2, viewport[1]*globalConfig.Scaling*screenScale - height/2]}
                 scale={zoom} rotation={rotation} anchor={0.5}>
-                    <Graphics draw={graphics => {
+                    <Graphics draw={(graphics:PIXI.Graphics) => {
                         graphics.clear();
                         regions.forEach(region => {
                             const texture = PIXI.Texture.from(`assets/${region.src}.png`);

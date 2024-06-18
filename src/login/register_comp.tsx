@@ -2,7 +2,6 @@ import { useState, useContext } from "react";
 import { globalContext } from "../App";
 import { LoginContext } from "./main";
 import { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "../api/firebase";
-import { User } from "firebase/auth";
 
 export default function Index() {
     const {user, setUser} = useContext(globalContext);

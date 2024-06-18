@@ -118,7 +118,7 @@ export default class ServerLogic {
                     let myChar = this.world.getWorldObjects().creatures.find(v => v.uuid == data.uuid) as Player
                     socket.emit('update', {
                         updater:updater.filter((v) => isInChunk(myChar.x, myChar.y, v.x, v.y, 32, 1)),
-                        add:add.filter((v) => isInChunk(myChar.x, myChar.y, v.x, v.y, 32, 1)),
+                        add:add.filter((v) => isInChunk(myChar.x, myChar.y, v.x, v.y, 24, 1)),
                         remove
                     })
                 })

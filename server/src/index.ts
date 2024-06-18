@@ -43,15 +43,10 @@ app.use((_req, res, next) => {
     next();
 });
 
+app.use(express.static('public'));
+
 app.get('/', (_req, res) => {
-    res.json({
-        online: server.getServerInfo().online,
-        name: server.getServerInfo().name,
-        description: server.getServerInfo().description,
-        date: server.getServerInfo().date,
-        maxplayers: server.getServerInfo().maxplayers,
-        onlineplayers: server.getServerInfo().onlineplayers,
-    });
+    res.json({...server.getServerInfo()});
 });
 
 const clearRoute = (string: string): string => {

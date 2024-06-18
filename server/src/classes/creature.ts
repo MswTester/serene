@@ -1,6 +1,7 @@
 import { generateUUID, EventEmitter } from "./utils";
 import Inventory from "./systems/inventory";
 import World from "./world";
+import { ItemSaveFormat } from "./item";
 
 enum Direction{
     Up = 'up',
@@ -128,21 +129,21 @@ export default class Creature {
     }
 
     update(saveform:CreatureSaveFormat){
-        this.type = saveform.type
-        this.x = saveform.x
-        this.y = saveform.y
-        this.dx = saveform.dx
-        this.dy = saveform.dy
-        this.direction = saveform.direction
-        this.level = saveform.level
-        this.exp = saveform.exp
-        this.state = saveform.state
-        this.health = saveform.health
-        this.food = saveform.food
-        this.isTamed = saveform.isTamed
-        this.inventory = Inventory.toInventory(saveform.inventory)
-        this.ownerId = saveform.ownerId
-        this.ownerGuildId = saveform.ownerGuildId
+        this.type = saveform.type || this.type
+        this.x = saveform.x == undefined ? this.x : saveform.x
+        this.y = saveform.y == undefined ? this.y : saveform.y
+        this.dx = saveform.dx == undefined ? this.dx : saveform.dx
+        this.dy = saveform.dy == undefined ? this.dy : saveform.dy
+        this.direction = saveform.direction || this.direction
+        this.level = saveform.level == undefined ? this.level : saveform.level
+        this.exp = saveform.exp == undefined ? this.exp : saveform.exp
+        this.state = saveform.state || this.state
+        this.health = saveform.health == undefined ? this.health : saveform.health
+        this.food = saveform.food == undefined ? this.food : saveform.food
+        this.isTamed = saveform.isTamed == undefined ? this.isTamed : saveform.isTamed
+        this.inventory = Inventory.toInventory(saveform.inventory) || this.inventory
+        this.ownerId = saveform.ownerId || this.ownerId
+        this.ownerGuildId = saveform.ownerGuildId || this.ownerGuildId
     }
 
     tick(world: World) {

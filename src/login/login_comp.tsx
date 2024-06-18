@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { globalContext } from "../App";
 import { LoginContext } from "./main";
 import { auth, signInWithEmailAndPassword } from "../api/firebase";
+import { ImageResource } from "pixi.js";
 
 export default function Index() {
     const {user, setUser} = useContext(globalContext);
@@ -48,7 +49,7 @@ export default function Index() {
     }
 
     return (<>
-        <div className="w-full h-full shadow-sm bg-[#000000] text-white flex justify-center items-center flex-col bg-cover bg-center" data-v0-t="card" style={{backgroundImage: `url(assets/loginbg.png)`}}>
+        <div className="w-full h-full shadow-sm bg-[#000000] text-white flex justify-center items-center flex-col bg-cover bg-center" data-v0-t="card" style={{backgroundImage: "url(assets/loginbg.png)"}}>
             {loading && <div className="absolute inset-0 overflow-hidden">
                 <img src="assets/placeholder.svg" alt="Animated Background" className="object-cover absolute" width="100" height="100" style={{aspectRatio: "100 / 100", top:'50%', left:'50%', transform:'translate(-50%, -50%)'}} />
                 <div className="absolute inset-0 bg-black opacity-60"></div>
